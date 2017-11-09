@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.finalproject.bidmeauction.BlogSingleActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/singleBlogView"
+            android:layout_width="match_parent"
+            android:layout_height="232dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/add_btn" />
+
+        <TextView
+            android:id="@+id/singleBlogTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@+id/singleBlogView"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:padding="20dp"/>
+
+        <TextView
+            android:id="@+id/singleBlogDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            app:layout_constraintTop_toBottomOf="@+id/singleBlogTitle"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:padding="20dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/komenTeks"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="@drawable/top_outline"
+                android:padding="10dp"
+                android:inputType="textPersonName"
+                android:textSize="13dp"
+                android:hint="Post Comment" />
+
+            <Button
+                android:id="@+id/komenBtn"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_weight="8"
+                android:text=">" />
+
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/komenSection"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Comment Section"
+            app:layout_constraintTop_toBottomOf="@+id/singleBlogDescription"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:paddingLeft="20dp"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/komen_list"
+            app:layout_constraintTop_toBottomOf="@+id/komenSection"></android.support.v7.widget.RecyclerView>
+
+    </LinearLayout>
+
+</ScrollView>
