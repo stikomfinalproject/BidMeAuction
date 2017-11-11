@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -19,11 +20,14 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,10 +38,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -66,11 +77,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public TextView noData;
 
+    private String afterPin = null;
+
+    MaterialSearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Blog");
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
@@ -84,6 +101,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         checkUserExist();
 
 
+        if(getIntent().getExtras() != null){
+            afterPin = getIntent().getExtras().getString("success_pin");
+            if(afterPin == null){
+                mDatabaseUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("pin")){
+                            Intent pinIntent = new Intent(MainActivity.this, PinActivity.class);
+                            startActivity(pinIntent);
+                            finish();
+                        }else
+                        {
+                            Intent setupPinIntent = new Intent(MainActivity.this, SetupPinActivity.class);
+                            startActivity(setupPinIntent);
+                            finish();
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }else{
+            mDatabaseUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("pin")){
+                        Intent pinIntent = new Intent(MainActivity.this, PinActivity.class);
+                        startActivity(pinIntent);
+                        finish();
+                    }else
+                    {
+                        Intent setupPinIntent = new Intent(MainActivity.this, SetupPinActivity.class);
+                        startActivity(setupPinIntent);
+                        finish();
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.blog_list);
         mRecyclerView.setHasFixedSize(true);
@@ -116,6 +183,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         );
+
+        searchView = (MaterialSearchView)findViewById(R.id.search_view);
+
+        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+
+                //If closed Search View , lstView will return default
+
+            }
+        });
+
+        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+
+                Toast.makeText(MainActivity.this, "You searched " + s, Toast.LENGTH_SHORT).show();
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                return true;
+            }
+
+        });
 
         //Navigation Menu
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
@@ -225,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setCancelable(true);
         builder.setTitle("Exit BidMe");
@@ -234,7 +335,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        finish();
+                        Intent exitIntent = new Intent(MainActivity.this, ExitActivity.class);
+                        exitIntent.addFlags(FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_NEW_TASK);
+                        exitIntent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(exitIntent);
 
                     }
                 });
@@ -376,6 +480,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
 
+        MenuItem item = menu.findItem(R.id.action_search);
+        searchView.setMenuItem(item);
+
         mDatabaseUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -419,6 +526,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (item.getItemId() == R.id.action_current_time){
 
             Intent postIntent = new Intent(MainActivity.this, MainActivity.class);
+            postIntent.addFlags(FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_NEW_TASK);
             startActivity(postIntent);
             finish();
 

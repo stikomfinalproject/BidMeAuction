@@ -236,7 +236,7 @@ public class BidActivity extends AppCompatActivity {
         });
 
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 
