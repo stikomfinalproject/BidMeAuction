@@ -28,6 +28,8 @@ import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.util.Date;
+
 public class RegisterAdminActivity extends AppCompatActivity {
 
     private EditText mNameField;
@@ -55,8 +57,6 @@ public class RegisterAdminActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_admin);
 
-
-
         mAuth1 = FirebaseAuth.getInstance();
 
         FirebaseOptions firebaseOptions = new FirebaseOptions.Builder()
@@ -65,7 +65,7 @@ public class RegisterAdminActivity extends AppCompatActivity {
                 .setApplicationId("bidme-auction").build();
 
         FirebaseApp myApp = FirebaseApp.initializeApp(getApplicationContext(),firebaseOptions,
-                "BidMe Auction");
+                String.valueOf(new Date()));
 
         mAuth2 = FirebaseAuth.getInstance(myApp);
 
@@ -104,14 +104,12 @@ public class RegisterAdminActivity extends AppCompatActivity {
             }
         });
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 
     public boolean onSupportNavigateUp() {
-        finish();
-        Intent mainIntent = new Intent(RegisterAdminActivity.this, MainActivity.class);
-        startActivity(mainIntent);
+        onBackPressed();
         return true;
     }
 
@@ -152,13 +150,16 @@ public class RegisterAdminActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Void aVoid) {
 
+                                        mNameField.setText("");
+                                        mEmailField.setText("");
+                                        mPasswordField.setText("");
+                                        mImageUri = null;
+                                        mRegisterImageBtn.setImageResource(android.R.color.transparent);
+
                                         mProgress.dismiss();
 
-                                        Intent mainIntent = new Intent(RegisterAdminActivity.this, MainActivity.class);
-                                        mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                        startActivity(mainIntent);
+                                        Toast.makeText(RegisterAdminActivity.this, "Success creating new admin named"+name, Toast.LENGTH_SHORT).show();
 
-                                        finish();
                                         mAuth2.signOut();
                                     }
                                 });

@@ -42,7 +42,10 @@
         <activity android:name=".BookedActivity" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".EditPostActivity" />
-        <activity android:name=".RegisterAdminActivity"></activity>
+        <activity android:name=".RegisterAdminActivity" />
+        <activity android:name=".PinActivity" />
+        <activity android:name=".SetupPinActivity" />
+        <activity android:name=".ExitActivity"></activity>
     </application>
 
 </manifest>
