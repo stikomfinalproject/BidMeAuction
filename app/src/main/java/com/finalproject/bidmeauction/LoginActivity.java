@@ -7,11 +7,16 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -59,6 +64,13 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        /*FULLSCREEN
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar.setTitle("Login BidMe");
+        setSupportActionBar(toolbar);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -79,7 +91,19 @@ public class LoginActivity extends AppCompatActivity {
         mLoginEmailField = (EditText) findViewById(R.id.loginEmailField);
         mLoginPasswordField = (EditText) findViewById(R.id.loginPasswordField);
 
+
         mLoginBtn = (Button) findViewById(R.id.loginBtn);
+
+        mLoginPasswordField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    mLoginBtn.performClick();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         mGoToRegister = (Button) findViewById(R.id.goToRegister);
 

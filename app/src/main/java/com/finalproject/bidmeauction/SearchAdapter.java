@@ -1,7 +1,6 @@
 package com.finalproject.bidmeauction;
 
 import android.content.Intent;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,15 +22,16 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by RAIIKA on 5/1/2017.
  */
 
-public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder> {
+public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> {
 
-    private List<Blog> mItems;
+    private LinkedList<Blog> mItems;
 
     private DatabaseReference mDatabaseBlog;
     private DatabaseReference mDatabaseTime;
@@ -42,9 +41,12 @@ public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder
 
     private Long currentTime = (long) 0;
 
-    public BookedAdapter() {
+    private String searchValue;
+
+    public SearchAdapter(final String s) {
         super();
-        mItems = new ArrayList<Blog>();
+
+        mItems = new LinkedList<Blog>();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -62,22 +64,22 @@ public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder
 
                 final DataSnapshot dataSnapshotParent = dataSnapshot;
 
-                mDatabaseBook.addValueEventListener(new ValueEventListener() {
+                mDatabaseBlog.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
                         mItems.clear();
-
                         for (final DataSnapshot postSnapshot: dataSnapshotParent.getChildren()) {
                             final Blog blog = postSnapshot.getValue(Blog.class);
-                            if (dataSnapshot.child(blog.getAuction_id()).hasChild(mAuth.getCurrentUser().getUid())){
 
-                                mItems.add(blog);
-
+                            if(blog.getTitle().contains(s)){
+                                mItems.addFirst(blog);
                             }
-                            else {
-
+                            else if(blog.getDesc().contains(s))
+                            {
+                                mItems.addLast(blog);
                             }
+
                         }
 
                     }
@@ -110,7 +112,7 @@ public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(final BookedAdapter.ViewHolder viewHolder, final int position) {
+    public void onBindViewHolder(final SearchAdapter.ViewHolder viewHolder, final int position) {
 
         final Blog model = mItems.get(position);
 
@@ -134,27 +136,6 @@ public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder
 
             }
         });
-
-        /*/BELAJAR DAPETIN WAKTU DARI SERVER
-        mDatabaseTime.setValue(ServerValue.TIMESTAMP);
-        mDatabaseTime.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                if(new Date(model.getWaktu()).after(new Date((long)dataSnapshot.getValue()))){
-
-                    viewHolder.mJoinRoomBtn.setText("Book");
-                    available[0] = false;
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });*/
 
         mDatabaseBook.addValueEventListener(new ValueEventListener() {
             @Override
@@ -196,7 +177,23 @@ public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder
                         }
                     });
                 }else{
-                    viewHolder.mBookRoomBtn.setText("Book");
+                    mDatabaseBlog.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                            if(new Date((long)dataSnapshot.child(post_key).child("waktu").getValue()).before(time[0])){
+                                viewHolder.mBookRoomBtn.setText("Join");
+                            }else {
+                                viewHolder.mBookRoomBtn.setText("Book");
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
                 //new BookedAdapter().notifyDataSetChanged();
 

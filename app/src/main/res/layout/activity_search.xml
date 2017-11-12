@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.finalproject.bidmeauction.MainActivity"
+    tools:context="com.finalproject.bidmeauction.SearchActivity"
     android:id="@+id/drawerLayout">
 
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -33,42 +33,41 @@
             android:textColorHint="#FFFFFF"
             />
 
-    <LinearLayout
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="55dp">
-
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/swiperefresh"
+        <LinearLayout
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="55dp">
 
-            <FrameLayout
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/swiperefresh"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent">
 
-                <TextView
-                    android:id="@+id/main_no_data"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textSize="20dp"
-                    android:text="There are no auction is held currently"
-                    android:visibility="gone" />
+                    android:layout_height="match_parent">
 
-                <android.support.v7.widget.RecyclerView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/blog_list"></android.support.v7.widget.RecyclerView>
+                    <TextView
+                        android:id="@+id/main_no_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:textSize="20dp"
+                        android:text="There are no auction is held currently"
+                        android:visibility="gone" />
 
-            </FrameLayout>
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/blog_list"></android.support.v7.widget.RecyclerView>
 
+                </FrameLayout>
 
-        </android.support.v4.widget.SwipeRefreshLayout>
+            </android.support.v4.widget.SwipeRefreshLayout>
 
-    </LinearLayout>
+        </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>
 

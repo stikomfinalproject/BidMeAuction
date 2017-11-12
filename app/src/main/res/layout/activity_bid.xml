@@ -55,7 +55,8 @@
             android:inputType="numberDecimal"
             android:text=""
             android:padding="5dp"
-            android:background="@drawable/input_outline"/>
+            android:background="@drawable/input_outline"
+            android:imeOptions="actionDone"/>
 
         <Button
             android:id="@+id/bid_btn"
