@@ -131,11 +131,12 @@ public class BlogSingleActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 String post_title = (String) dataSnapshot.child("title").getValue();
-                String post_desc = (String) dataSnapshot.child("desc").getValue();
+                //String post_desc = (String) dataSnapshot.child("desc").getValue();
+                Date tanggal = new Date((long) dataSnapshot.child("waktu").getValue());
                 String post_image = (String) dataSnapshot.child("image").getValue();
 
                 mBlogSingleTitle.setText(post_title);
-                mBlogSingleDesc.setText(post_desc);
+                mBlogSingleDesc.setText(String.valueOf(tanggal));
                 Picasso.with(BlogSingleActivity.this).load(post_image).into(mBlogSingleImage);
 
             }
@@ -151,7 +152,7 @@ public class BlogSingleActivity extends AppCompatActivity {
 // mLayoutManager.setStackFromEnd(true);
         mKomenList.setLayoutManager(mLayoutManager);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 

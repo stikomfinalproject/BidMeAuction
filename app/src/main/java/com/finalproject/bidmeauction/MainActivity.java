@@ -204,7 +204,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public boolean onQueryTextSubmit(String s) {
 
-                Toast.makeText(MainActivity.this, "You searched " + s, Toast.LENGTH_SHORT).show();
+                Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
+                searchIntent.putExtra("searchValue", s);
+                startActivity(searchIntent);
 
                 return false;
             }

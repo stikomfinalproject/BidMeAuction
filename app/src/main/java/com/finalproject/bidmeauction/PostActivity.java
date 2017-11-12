@@ -174,11 +174,11 @@ public class PostActivity extends AppCompatActivity {
 
                                     if(task.isSuccessful()){
 
-                                        finish();
-
                                         Intent mainIntent = new Intent(PostActivity.this, MainActivity.class);
                                         mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                         startActivity(mainIntent);
+
+                                        finish();
 
                                     }
 
