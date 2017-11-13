@@ -5,20 +5,30 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,7 +66,9 @@ public class BlogSingleActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseLike;
     private FirebaseStorage mFirebaseStorage;
 
-
+    private RecyclerView mRecyclerView;
+    RecyclerView.LayoutManager mLayoutManager;
+    RecyclerView.Adapter mAdapter;
 
     private String mPost_key = null;
 
@@ -76,12 +88,19 @@ public class BlogSingleActivity extends AppCompatActivity {
 
     private ProgressDialog mProgress;
 
-    private LinearLayoutManager mLayoutManager;
+    private FloatingActionButton mFloatingBtn;
+
+    private NestedScrollView mScrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blog_single);
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mProgress = new ProgressDialog(this);
 
@@ -112,6 +131,38 @@ public class BlogSingleActivity extends AppCompatActivity {
         mKomenTeks = (EditText) findViewById(R.id.komenTeks);
         mKomenBtn = (Button) findViewById(R.id.komenBtn);
 
+        mFloatingBtn = (FloatingActionButton) findViewById(R.id.floating_button);
+        mScrollView = (NestedScrollView) findViewById(R.id.scroll_view);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.komen_list);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setAutoMeasureEnabled(true);
+        mRecyclerView.setNestedScrollingEnabled(false);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mAdapter = new BlogKomenAdapter(mPost_key);
+        mRecyclerView.setAdapter(mAdapter);
+
+        mScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                Log.v(String.valueOf(v.getMaxScrollAmount()),String.valueOf(scrollY));
+                if(scrollY<2000){
+                    mFloatingBtn.setVisibility(View.GONE);
+                }else{
+                    mFloatingBtn.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        mFloatingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mScrollView.smoothScrollTo(0,0);
+            }
+        });
+
         mKomenBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,19 +175,29 @@ public class BlogSingleActivity extends AppCompatActivity {
             }
         });
 
-        //Toast.makeText(BlogSingleActivity.this, post_key, Toast.LENGTH_LONG).show();
+        mDatabaseKomen.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         mDatabase.child(mPost_key).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 String post_title = (String) dataSnapshot.child("title").getValue();
-                //String post_desc = (String) dataSnapshot.child("desc").getValue();
-                Date tanggal = new Date((long) dataSnapshot.child("waktu").getValue());
+                String post_desc = (String) dataSnapshot.child("desc").getValue();
+                //Date tanggal = new Date((long) dataSnapshot.child("waktu").getValue());
                 String post_image = (String) dataSnapshot.child("image").getValue();
 
                 mBlogSingleTitle.setText(post_title);
-                mBlogSingleDesc.setText(String.valueOf(tanggal));
+                mBlogSingleDesc.setText(post_desc);
                 Picasso.with(BlogSingleActivity.this).load(post_image).into(mBlogSingleImage);
 
             }
@@ -146,13 +207,6 @@ public class BlogSingleActivity extends AppCompatActivity {
 
             }
         });
-
-        mLayoutManager = new LinearLayoutManager(this);
-        mLayoutManager.setReverseLayout(true); // THIS ALSO SETS setStackFromBottom to true
-// mLayoutManager.setStackFromEnd(true);
-        mKomenList.setLayoutManager(mLayoutManager);
-
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 
@@ -179,6 +233,8 @@ public class BlogSingleActivity extends AppCompatActivity {
                     newPost.child("username").setValue(dataSnapshot.child(mCurrentUser.getUid()).child("name").getValue().toString());
                     newPost.child("desc").setValue(desc_val);
                     newPost.child("waktu").setValue(ServerValue.TIMESTAMP);
+                    newPost.child("komen_id").setValue(newPost.getKey());
+                    newPost.child("bestkomen").setValue(false);
 
                     /* BELAJAR READ WAKTU BUAT AUCTION
                     newPost.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -215,153 +271,6 @@ public class BlogSingleActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        FirebaseRecyclerAdapter<Komen, KomenViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Komen, KomenViewHolder>(
-
-                Komen.class, R.layout.komen_row, KomenViewHolder.class, mDatabaseKomen.child(mPost_key).orderByChild("waktu")
-
-        ) {
-            @Override
-            protected void populateViewHolder(final KomenViewHolder viewHolder, final Komen model, int position) {
-
-                viewHolder.setDesc(model.getDesc());
-                viewHolder.setUsername(model.getUsername());
-                viewHolder.setUsername(model.getUsername());
-                viewHolder.setWaktu(model.getWaktu());
-
-                /* BELAJAR DAPETIN WAKTU DARI SERVER
-                mDatabaseTests.setValue(ServerValue.TIMESTAMP);
-                mDatabaseTests.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                        if(new Date(model.getWaktu()).before(new Date((long)dataSnapshot.getValue()))){
-                            Log.v("LLLOOOOGGGG","KE PRINT LOH MANTAP KAN");
-
-
-
-                        }
-
-                        Log.v("LLLOOOOGGGG",String.valueOf(new Date((long)dataSnapshot.getValue())));
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });*/
-
-
-
-
-
-                final String komen_key = getRef(position).getKey();
-
-                mDatabaseUser.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                        if (model.getUsername().equals(dataSnapshot.child(mCurrentUser.getUid()).child("name").getValue().toString()))
-                        {
-
-                            viewHolder.mDeleteBtn.setVisibility(1);
-
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-
-
-                viewHolder.mDeleteBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        AlertDialog.Builder builder = new AlertDialog.Builder(BlogSingleActivity.this);
-                        builder.setCancelable(true);
-                        builder.setTitle("Delete Post");
-                        builder.setMessage("Are you sure you want to delete this post ?");
-                        builder.setPositiveButton("Ofcourse",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                        mDatabaseKomen.addValueEventListener(new ValueEventListener() {
-
-                                            @Override
-                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                mDatabaseKomen.child(mPost_key).child(komen_key).removeValue();
-
-                                            }
-
-                                            @Override
-                                            public void onCancelled(DatabaseError databaseError) {
-
-                                            }
-                                        });
-
-                                    }
-                                });
-                        builder.setNegativeButton("Nope", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-
-                    }
-                });
-
-
-            }
-        };
-
-        mKomenList.setAdapter(firebaseRecyclerAdapter);
-
-    }
-
-    public static class KomenViewHolder extends RecyclerView.ViewHolder{
-
-        View mView;
-
-        TextView mDeleteBtn;
-
-        public KomenViewHolder(View itemView) {
-            super(itemView);
-
-            mView = itemView;
-
-            mDeleteBtn = (TextView) mView.findViewById(R.id.deleteBtn);
-        }
-
-        public void setUsername(String username){
-
-            TextView post_username = (TextView) mView.findViewById(R.id.post_username);
-            post_username.setText(username);
-
-        }
-
-        public void setWaktu(Long waktu){
-
-            TextView post_datetime = (TextView) mView.findViewById(R.id.post_datetime);
-            post_datetime.setText(String.valueOf(android.text.format.DateFormat.format("dd-MM-yyyy / hh:mm a", new Date(waktu))));
-
-        }
-
-        public void setDesc(String desc){
-
-            TextView post_desc = (TextView) mView.findViewById(R.id.post_desc);
-            post_desc.setText(desc);
-
-        }
 
     }
 
