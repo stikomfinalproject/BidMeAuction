@@ -5,22 +5,30 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,6 +88,10 @@ public class BlogSingleActivity extends AppCompatActivity {
 
     private ProgressDialog mProgress;
 
+    private FloatingActionButton mFloatingBtn;
+
+    private NestedScrollView mScrollView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,12 +131,37 @@ public class BlogSingleActivity extends AppCompatActivity {
         mKomenTeks = (EditText) findViewById(R.id.komenTeks);
         mKomenBtn = (Button) findViewById(R.id.komenBtn);
 
+        mFloatingBtn = (FloatingActionButton) findViewById(R.id.floating_button);
+        mScrollView = (NestedScrollView) findViewById(R.id.scroll_view);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.komen_list);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setAutoMeasureEnabled(true);
+        mRecyclerView.setNestedScrollingEnabled(false);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setLayoutManager(layoutManager);
 
         mAdapter = new BlogKomenAdapter(mPost_key);
         mRecyclerView.setAdapter(mAdapter);
+
+        mScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                Log.v(String.valueOf(v.getMaxScrollAmount()),String.valueOf(scrollY));
+                if(scrollY<2000){
+                    mFloatingBtn.setVisibility(View.GONE);
+                }else{
+                    mFloatingBtn.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        mFloatingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mScrollView.smoothScrollTo(0,0);
+            }
+        });
 
         mKomenBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -197,6 +234,7 @@ public class BlogSingleActivity extends AppCompatActivity {
                     newPost.child("desc").setValue(desc_val);
                     newPost.child("waktu").setValue(ServerValue.TIMESTAMP);
                     newPost.child("komen_id").setValue(newPost.getKey());
+                    newPost.child("bestkomen").setValue(false);
 
                     /* BELAJAR READ WAKTU BUAT AUCTION
                     newPost.addListenerForSingleValueEvent(new ValueEventListener() {

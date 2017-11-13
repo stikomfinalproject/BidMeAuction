@@ -473,6 +473,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
 
+        if (item.getItemId() == R.id.nav_setting){
+
+            Toast.makeText(MainActivity.this, "Not available yet", Toast.LENGTH_SHORT).show();
+
+        }
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayout);
         drawer.closeDrawer(GravityCompat.START);
 
