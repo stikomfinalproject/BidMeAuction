@@ -195,28 +195,30 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
         }
 
-        public void setTitle(String title){
+        public void setTitle(String title){/*
             String readmore = "";
             if(title.length() > 20){
                 readmore = "...";
             }
             String upToNCharacters = title.substring(0, Math.min(title.length(), 20));
-
+*/
 
             TextView post_title = (TextView) mView.findViewById(R.id.post_title);
-            post_title.setText(upToNCharacters + readmore);
+            post_title.setText(title);
+            //post_title.setText(upToNCharacters + readmore);
 
         }
 
         public void setDesc(String desc){
-            String readmore = "";
+            /*String readmore = "";
             if(desc.length() > 20){
                 readmore = "...";
             }
-            String upToNCharacters = desc.substring(0, Math.min(desc.length(), 20));
+            String upToNCharacters = desc.substring(0, Math.min(desc.length(), 20));*/
 
             TextView post_desc = (TextView) mView.findViewById(R.id.post_desc);
-            post_desc.setText(upToNCharacters + readmore);
+            post_desc.setText(desc);
+            //post_desc.setText(upToNCharacters + readmore);
 
         }
 
