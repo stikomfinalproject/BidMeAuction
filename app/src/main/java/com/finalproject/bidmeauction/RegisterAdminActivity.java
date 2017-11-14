@@ -87,7 +87,7 @@ public class RegisterAdminActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                startRegister();
+                startRegisterAdmin();
 
             }
         });
@@ -113,7 +113,7 @@ public class RegisterAdminActivity extends AppCompatActivity {
         return true;
     }
 
-    private void startRegister() {
+    private void startRegisterAdmin() {
 
         final String name = mNameField.getText().toString().trim();
         final String email = mEmailField.getText().toString().trim();

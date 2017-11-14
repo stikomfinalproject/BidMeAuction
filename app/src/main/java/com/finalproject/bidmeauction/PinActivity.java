@@ -42,12 +42,9 @@ public class PinActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        if(pinNumber.getText().toString().equals(dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("pin").getValue().toString())){
-                            Intent mainIntent = new Intent(PinActivity.this, MainActivity.class);
-                            mainIntent.putExtra("success_pin", "success");
-                            mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(mainIntent);
-                        }
+                        User userModel = dataSnapshot.child(mAuth.getCurrentUser().getUid()).getValue(User.class);
+
+                        checkPin(userModel);
 
                     }
 
@@ -60,5 +57,14 @@ public class PinActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void checkPin(User userModel) {
+        if(pinNumber.getText().toString().equals(userModel.getPin())){
+            Intent mainIntent = new Intent(PinActivity.this, MainActivity.class);
+            mainIntent.putExtra("success_pin", "success");
+            mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(mainIntent);
+        }
     }
 }

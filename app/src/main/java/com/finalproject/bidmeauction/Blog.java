@@ -8,17 +8,17 @@ import java.util.Date;
 
 public class Blog {
 
-    private String title, desc, image, username, bidname, auction_id;
+    private String title, desc, image, username, bidname, auction_id, biduid;
 
     private long waktu;
 
-    private double bid;
+    private int bid;
 
     public Blog(){
 
     }
 
-    public Blog(String title, String desc, String image, String username, String bidname, long waktu, double bid, String auction_id) {
+    public Blog(String title, String desc, String image, String username, String bidname, long waktu, int bid, String auction_id, String biduid) {
         this.title = title;
         this.desc = desc;
         this.image = image;
@@ -27,6 +27,15 @@ public class Blog {
         this.waktu = waktu;
         this.bid = bid;
         this.auction_id = auction_id;
+        this.biduid = biduid;
+    }
+
+    public String getBiduid() {
+        return biduid;
+    }
+
+    public void setBiduid(String biduid) {
+        this.biduid = biduid;
     }
 
     public String getAuction_id() {
@@ -53,11 +62,11 @@ public class Blog {
         this.waktu = waktu;
     }
 
-    public double getBid() {
+    public int getBid() {
         return bid;
     }
 
-    public void setBid(double bid) {
+    public void setBid(int bid) {
         this.bid = bid;
     }
 
