@@ -79,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private String afterPin = null;
 
+    private boolean admin = false;
+
     MaterialSearchView searchView;
 
     @Override
@@ -100,57 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mAuth = FirebaseAuth.getInstance();
         checkUserExist();
 
-
-        if(getIntent().getExtras() != null){
-            afterPin = getIntent().getExtras().getString("success_pin");
-            if(afterPin == null){
-                mDatabaseUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                        if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("pin")){
-                            Intent pinIntent = new Intent(MainActivity.this, PinActivity.class);
-                            startActivity(pinIntent);
-                            finish();
-                        }else
-                        {
-                            Intent setupPinIntent = new Intent(MainActivity.this, SetupPinActivity.class);
-                            startActivity(setupPinIntent);
-                            finish();
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-        }else{
-            mDatabaseUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("pin")){
-                        Intent pinIntent = new Intent(MainActivity.this, PinActivity.class);
-                        startActivity(pinIntent);
-                        finish();
-                    }else
-                    {
-                        Intent setupPinIntent = new Intent(MainActivity.this, SetupPinActivity.class);
-                        startActivity(setupPinIntent);
-                        finish();
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
+        checkPinSuccess();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.blog_list);
         mRecyclerView.setHasFixedSize(true);
@@ -162,51 +114,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mAdapter = new MainAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
-        //Swipe to REFRESH
-        mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
-        mySwipeRefreshLayout.setOnRefreshListener(
-            new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-
-                    mySwipeRefreshLayout.setRefreshing(true);
-                    mAdapter.notifyDataSetChanged();
-
-                    if(mAdapter.getItemCount() <1){
-                        noData.setVisibility(View.VISIBLE);
-                    }
-                    else{
-                        noData.setVisibility(View.GONE);
-                    }
-                    mySwipeRefreshLayout.setRefreshing(false);
-
-                }
-            }
-        );
-
         searchView = (MaterialSearchView)findViewById(R.id.search_view);
-
-        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
-            @Override
-            public void onSearchViewShown() {
-
-            }
-
-            @Override
-            public void onSearchViewClosed() {
-
-                //If closed Search View , lstView will return default
-
-            }
-        });
 
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
 
-                Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
-                searchIntent.putExtra("searchValue", s);
-                startActivity(searchIntent);
+                doSearch(s);
 
                 return false;
             }
@@ -232,7 +146,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("type")){
 
-                    if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("type").getValue().toString().equals("admin")) {
+                    User userModel = dataSnapshot.child(mAuth.getCurrentUser().getUid()).getValue(User.class);
+
+                    if(checkIsAdmin(userModel)) {
 
                         Menu nav_Menu = navigationView.getMenu();
                         nav_Menu.findItem(R.id.nav_add_admin).setVisible(true);
@@ -249,6 +165,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
+        //Swipe to REFRESH
+        mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mySwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+
+                        mySwipeRefreshLayout.setRefreshing(true);
+                        mAdapter.notifyDataSetChanged();
+
+                        if(mAdapter.getItemCount() <1){
+                            noData.setVisibility(View.VISIBLE);
+                        }
+                        else{
+                            noData.setVisibility(View.GONE);
+                        }
+                        mySwipeRefreshLayout.setRefreshing(false);
+
+                    }
+                }
+        );
+
         noData = (TextView) findViewById(R.id.main_no_data);
 
         noData.setVisibility(View.GONE);
@@ -256,16 +194,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mAdapter.notifyDataSetChanged();
-                navigationView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                mRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                     @Override
                     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                        navigationView.removeOnLayoutChangeListener(this);
-                        /*if(mAdapter.getItemCount() <1){
+                        if(mAdapter.getItemCount() <1){
                             noData.setVisibility(View.VISIBLE);
                         }
                         else{
                             noData.setVisibility(View.GONE);
-                        }*/
+                        }
                     }
                 });
             }
@@ -323,6 +260,73 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+    }
+
+    private boolean checkIsAdmin(User userModel) {
+        if (userModel.getType().equals("admin")) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private void doSearch(String s) {
+        Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
+        searchIntent.putExtra("searchValue", s);
+        startActivity(searchIntent);
+    }
+
+    private void checkPinSuccess() {
+        if(getIntent().getExtras() != null){
+            afterPin = getIntent().getExtras().getString("success_pin");
+            if(afterPin == null){
+                mDatabaseUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("pin")){
+                            Intent pinIntent = new Intent(MainActivity.this, PinActivity.class);
+                            startActivity(pinIntent);
+                            finish();
+                        }else
+                        {
+                            Intent setupPinIntent = new Intent(MainActivity.this, SetupPinActivity.class);
+                            startActivity(setupPinIntent);
+                            finish();
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }else{
+            mDatabaseUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("pin")){
+                        Intent pinIntent = new Intent(MainActivity.this, PinActivity.class);
+                        startActivity(pinIntent);
+                        finish();
+                    }else
+                    {
+                        Intent setupPinIntent = new Intent(MainActivity.this, SetupPinActivity.class);
+                        startActivity(setupPinIntent);
+                        finish();
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     @Override

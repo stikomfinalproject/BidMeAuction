@@ -68,15 +68,17 @@ public class BidActivity extends AppCompatActivity {
     private int bid_plus = 0;
     private String bid_name = "";
 
+    DecimalFormatSymbols symbols;
+    DecimalFormat decimalFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bid);
 
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols = new DecimalFormatSymbols();
         symbols.setGroupingSeparator('.');
-        final DecimalFormat decimalFormat = new DecimalFormat("Rp #,###", symbols);
+        decimalFormat = new DecimalFormat("Rp #,###", symbols);
 
         mProgress = new ProgressDialog(this);
 
@@ -115,30 +117,8 @@ public class BidActivity extends AppCompatActivity {
         mDatabase.child(mPost_key).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                bid_total = Integer.parseInt(dataSnapshot.child("bid").getValue().toString());
-
-                int bidBid = Integer.parseInt(dataSnapshot.child("bid").getValue().toString());
-
-                String rupiahFormat = decimalFormat.format(bidBid);
-                mBidBid.setText(rupiahFormat);
-
-                mBidUsername.setText(dataSnapshot.child("bidname").getValue().toString());
-
-                if (dataSnapshot.child("biduid").getValue().toString().equals(mCurrentUser.getUid())) {
-                    mBidTeks.setEnabled(false);
-                    mBidBtn.setEnabled(false);
-                    mBidQuick.setEnabled(false);
-                } else {
-                    mBidTeks.setEnabled(true);
-                    mBidBtn.setEnabled(true);
-                    mBidQuick.setEnabled(true);
-                }
-
-                bid_plus = bid_total / 20;
-
-                mBidQuick.setText("QUICK BID - " + String.valueOf(bid_total + bid_plus));
-
+                Blog model = dataSnapshot.getValue(Blog.class);
+                checkHighestBid(model);
             }
 
             @Override
@@ -150,53 +130,26 @@ public class BidActivity extends AppCompatActivity {
         mBidQuick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                bid_plus = bid_total / 20;
-
-                mDatabase.child(mPost_key).child("bid").setValue(bid_total + bid_plus);
-
-                mDatabase.child(mPost_key).child("bidname").setValue(bid_name);
-
-                mDatabase.child(mPost_key).child("biduid").setValue(mCurrentUser.getUid());
-
-                mBidTeks.setText("");
-
+                performQuickBid();
             }
 
-        });
-
-        mBidBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String bidTeks = mBidTeks.getText().toString().replace(",","");
-                if (bidTeks.equals("")) {
-                    Toast.makeText(BidActivity.this, "Input your amount", Toast.LENGTH_SHORT).show();
-                } else if (Integer.parseInt(bidTeks) <= bid_total) {
-                    Toast.makeText(BidActivity.this, "Your Ammount is less than the highest bid", Toast.LENGTH_SHORT).show();
-                } else {
-
-                    mDatabase.child(mPost_key).child("bid").setValue(Integer.parseInt(bidTeks));
-
-                    mDatabase.child(mPost_key).child("bidname").setValue(bid_name);
-
-                    mDatabase.child(mPost_key).child("biduid").setValue(mCurrentUser.getUid());
-
-                }
-
-                mBidTeks.setText("");
-
-            }
         });
 
         mBidTeks.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                mBidBtn.performClick();
-                return true;
-            }
+                    mBidBtn.performClick();
+                    return true;
+                }
                 return false;
+            }
+        });
+
+        mBidBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                performBid();
             }
         });
 
@@ -214,7 +167,6 @@ public class BidActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
                 int cursorPosition = mBidTeks.getSelectionEnd();
                 String originalStr = mBidTeks.getText().toString();
 
@@ -251,6 +203,61 @@ public class BidActivity extends AppCompatActivity {
 
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+    }
+
+    private void performQuickBid() {
+        bid_plus = bid_total / 20;
+
+        DatabaseReference newPost = mDatabase.child(mPost_key);
+
+        newPost.child("bid").setValue(bid_total + bid_plus);
+
+        newPost.child("bidname").setValue(bid_name);
+
+        newPost.child("biduid").setValue(mCurrentUser.getUid());
+
+        mBidTeks.setText("");
+    }
+
+    private void performBid() {
+        String bidTeks = mBidTeks.getText().toString().replace(",","");
+        if (bidTeks.equals("")) {
+            Toast.makeText(BidActivity.this, "Input your amount", Toast.LENGTH_SHORT).show();
+        } else if (Integer.parseInt(bidTeks) <= bid_total) {
+            Toast.makeText(BidActivity.this, "Your Ammount is less than the highest bid", Toast.LENGTH_SHORT).show();
+        } else {
+            DatabaseReference newPost = mDatabase.child(mPost_key);
+            newPost.child("bid").setValue(Integer.parseInt(bidTeks));
+            newPost.child("bidname").setValue(bid_name);
+            newPost.child("biduid").setValue(mCurrentUser.getUid());
+        }
+
+        mBidTeks.setText("");
+    }
+
+    private void checkHighestBid(Blog model) {
+        bid_total = model.getBid();
+
+        int bidBid = model.getBid();
+
+        String rupiahFormat = decimalFormat.format(bidBid);
+        mBidBid.setText(rupiahFormat);
+
+        mBidUsername.setText(model.getBidname());
+
+        if (model.getBiduid().equals(mCurrentUser.getUid())) {
+            mBidTeks.setEnabled(false);
+            mBidBtn.setEnabled(false);
+            mBidQuick.setEnabled(false);
+        } else {
+            mBidTeks.setEnabled(true);
+            mBidBtn.setEnabled(true);
+            mBidQuick.setEnabled(true);
+        }
+
+        bid_plus = bid_total / 20;
+
+        mBidQuick.setText("QUICK BID - " + String.valueOf(bid_total + bid_plus));
     }
 
 

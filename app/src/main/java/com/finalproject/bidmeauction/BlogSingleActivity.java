@@ -144,10 +144,16 @@ public class BlogSingleActivity extends AppCompatActivity {
         mAdapter = new BlogKomenAdapter(mPost_key);
         mRecyclerView.setAdapter(mAdapter);
 
+        mFloatingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mScrollView.smoothScrollTo(0,0);
+            }
+        });
+
         mScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                Log.v(String.valueOf(v.getMaxScrollAmount()),String.valueOf(scrollY));
                 if(scrollY<2000){
                     mFloatingBtn.setVisibility(View.GONE);
                 }else{
@@ -156,22 +162,10 @@ public class BlogSingleActivity extends AppCompatActivity {
             }
         });
 
-        mFloatingBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mScrollView.smoothScrollTo(0,0);
-            }
-        });
-
         mKomenBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
                 startKomenting();
-                mKomenTeks.setText("");
-                //mDatabaseAddKomen.child("desc").setValue();
-
             }
         });
 
@@ -191,14 +185,11 @@ public class BlogSingleActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                String post_title = (String) dataSnapshot.child("title").getValue();
-                String post_desc = (String) dataSnapshot.child("desc").getValue();
-                //Date tanggal = new Date((long) dataSnapshot.child("waktu").getValue());
-                String post_image = (String) dataSnapshot.child("image").getValue();
+                Blog model = dataSnapshot.getValue(Blog.class);
 
-                mBlogSingleTitle.setText(post_title);
-                mBlogSingleDesc.setText(post_desc);
-                Picasso.with(BlogSingleActivity.this).load(post_image).into(mBlogSingleImage);
+                mBlogSingleTitle.setText(model.getTitle());
+                mBlogSingleDesc.setText(model.getDesc());
+                Picasso.with(BlogSingleActivity.this).load(model.getImage()).into(mBlogSingleImage);
 
             }
 
@@ -212,13 +203,10 @@ public class BlogSingleActivity extends AppCompatActivity {
 
     private void startKomenting() {
 
-
         final String desc_val = mKomenTeks.getText().toString().trim();
-
 
         mProgress.setMessage("Posting Your Komen...");
         mProgress.setCancelable(false);
-
 
         if(!TextUtils.isEmpty(desc_val)) {
 
@@ -236,21 +224,6 @@ public class BlogSingleActivity extends AppCompatActivity {
                     newPost.child("komen_id").setValue(newPost.getKey());
                     newPost.child("bestkomen").setValue(false);
 
-                    /* BELAJAR READ WAKTU BUAT AUCTION
-                    newPost.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-
-                            newPost.child("waktu").setValue((long)dataSnapshot.child("waktu").getValue()+86400000);
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });*/
-
                     Toast.makeText(BlogSingleActivity.this, "Success Commenting", Toast.LENGTH_LONG).show();
 
                 }
@@ -258,13 +231,13 @@ public class BlogSingleActivity extends AppCompatActivity {
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
-
-
                 }
             });
 
             mProgress.dismiss();
         }
+
+        mKomenTeks.setText("");
 
     }
 
@@ -303,7 +276,6 @@ public class BlogSingleActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
 
         if(item.getItemId() == R.id.action_delete){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -350,7 +322,6 @@ public class BlogSingleActivity extends AppCompatActivity {
 
             AlertDialog dialog = builder.create();
             dialog.show();
-
 
         }
 
