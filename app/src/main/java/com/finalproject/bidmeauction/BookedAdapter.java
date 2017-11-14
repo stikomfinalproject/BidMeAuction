@@ -126,35 +126,12 @@ public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder
             @Override
             public void onClick(View v) {
 
-                //Toast.makeText(MainActivity.this, post_key, Toast.LENGTH_LONG).show();
-
                 Intent singleBlogIntent = new Intent(v.getContext(), BlogSingleActivity.class);
                 singleBlogIntent.putExtra("blog_id", post_key);
                 v.getContext().startActivity(singleBlogIntent);
 
             }
         });
-
-        /*/BELAJAR DAPETIN WAKTU DARI SERVER
-        mDatabaseTime.setValue(ServerValue.TIMESTAMP);
-        mDatabaseTime.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                if(new Date(model.getWaktu()).after(new Date((long)dataSnapshot.getValue()))){
-
-                    viewHolder.mJoinRoomBtn.setText("Book");
-                    available[0] = false;
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });*/
 
         mDatabaseBook.addValueEventListener(new ValueEventListener() {
             @Override
@@ -182,7 +159,9 @@ public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
-                            if(new Date((long)dataSnapshot.child(post_key).child("waktu").getValue()).before(time[0])){
+                            Blog blogModel = dataSnapshot.child(post_key).getValue(Blog.class);
+
+                            if(new Date(blogModel.getWaktu()).before(time[0])){
                                 viewHolder.mBookRoomBtn.setText("Join");
                             }else {
                                 viewHolder.mBookRoomBtn.setText("Cancel Book");
@@ -218,9 +197,9 @@ public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder
                     singleBlogIntent.putExtra("blog_id", post_key);
                     v.getContext().startActivity(singleBlogIntent);
                 }else if(viewHolder.mBookRoomBtn.getText().equals("Book")){
-                    mDatabaseBook.child(post_key).child(mAuth.getCurrentUser().getUid()).setValue(model.getWaktu());
+                    bookAuction(post_key, model);
                 }else{
-                    mDatabaseBook.child(post_key).child(mAuth.getCurrentUser().getUid()).removeValue();
+                    unBookAuction(post_key);
                 }
 
             }
@@ -228,14 +207,20 @@ public class BookedAdapter extends RecyclerView.Adapter<BookedAdapter.ViewHolder
 
     }
 
+    private void bookAuction(String post_key, Blog model) {
+        mDatabaseBook.child(post_key).child(mAuth.getCurrentUser().getUid()).setValue(model.getWaktu());
+    }
+
+    private void unBookAuction(String post_key) {
+        mDatabaseBook.child(post_key).child(mAuth.getCurrentUser().getUid()).removeValue();
+    }
+
     @Override
     public int getItemCount() {
-
         return mItems.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder  {
-
 
         View mView;
 
