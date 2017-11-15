@@ -46,7 +46,8 @@
         <activity android:name=".PinActivity" />
         <activity android:name=".SetupPinActivity" />
         <activity android:name=".ExitActivity" />
-        <activity android:name=".SearchActivity"></activity>
+        <activity android:name=".SearchActivity" />
+        <activity android:name=".ForgotActivity"></activity>
     </application>
 
 </manifest>
