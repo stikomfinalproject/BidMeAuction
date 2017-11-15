@@ -101,13 +101,15 @@ public class EditPostActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
+                Blog modelAuction = dataSnapshot.child(mPost_key).getValue(Blog.class);
+
                 Picasso.with(getApplicationContext()).load(dataSnapshot.child(mPost_key).child("image").getValue().toString()).into(mSelectImage);
 
-                mPostTitle.setText(dataSnapshot.child(mPost_key).child("title").getValue().toString());
-                mPostDesc.setText(dataSnapshot.child(mPost_key).child("desc").getValue().toString());
-                mPostBid.setText(dataSnapshot.child(mPost_key).child("bid").getValue().toString());
+                mPostTitle.setText(modelAuction.getTitle());
+                mPostDesc.setText(modelAuction.getDesc());
+                mPostBid.setText(String.valueOf(modelAuction.getBid()));
                 Calendar waktu = Calendar.getInstance();
-                waktu.setTimeInMillis((long) dataSnapshot.child(mPost_key).child("waktu").getValue());
+                waktu.setTimeInMillis(modelAuction.getWaktu());
                 mDateRoom.updateDate(waktu.get(Calendar.YEAR), waktu.get(Calendar.MONTH), waktu.get(Calendar.DAY_OF_MONTH));
                 if (Build.VERSION.SDK_INT >= 23 ){
                     mTimeRoom.setHour(waktu.get(Calendar.HOUR_OF_DAY));
@@ -141,7 +143,7 @@ public class EditPostActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                startPosting();
+                startEditPost();
 
             }
         });
@@ -150,7 +152,7 @@ public class EditPostActivity extends AppCompatActivity {
 
     }
 
-    private void startPosting() {
+    private void startEditPost() {
 
         mProgress.setMessage("Posting to Blog ...");
         mProgress.setCancelable(false);

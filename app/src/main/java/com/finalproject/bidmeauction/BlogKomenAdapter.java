@@ -72,21 +72,7 @@ public class BlogKomenAdapter extends RecyclerView.Adapter<BlogKomenAdapter.View
         mDatabaseKomen.child(mPostKey).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                mKomens.clear();
-
-                for (final DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-
-                    Komen komen = postSnapshot.getValue(Komen.class);
-
-                    if(komen.isBestkomen()){
-                        mKomens.addFirst(komen);
-                    }else {
-                        mKomens.add(komen);
-                    }
-
-                }
-
+                reloadComment(dataSnapshot);
             }
 
             @Override
@@ -95,6 +81,21 @@ public class BlogKomenAdapter extends RecyclerView.Adapter<BlogKomenAdapter.View
             }
         });
 
+    }
+
+    private void reloadComment(DataSnapshot dataSnapshot) {
+        mKomens.clear();
+        for (final DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+
+            Komen komen = postSnapshot.getValue(Komen.class);
+
+            if(komen.isBestkomen()){
+                mKomens.addFirst(komen);
+            }else {
+                mKomens.add(komen);
+            }
+
+        }
     }
 
     @Override
@@ -111,8 +112,6 @@ public class BlogKomenAdapter extends RecyclerView.Adapter<BlogKomenAdapter.View
 
         final Komen model = mKomens.get(position);
 
-        final String komen_key = model.getKomen_id();
-
         viewHolder.setDesc(model.getDesc());
         viewHolder.setUsername(model.getUsername());
         viewHolder.setWaktu(model.getWaktu());
@@ -121,20 +120,7 @@ public class BlogKomenAdapter extends RecyclerView.Adapter<BlogKomenAdapter.View
         mDatabaseUser.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                if (model.getUsername().equals(dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("name").getValue().toString()))
-                {
-
-                    viewHolder.mDeleteBtn.setVisibility(1);
-
-                }
-
-                if(dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("type").getValue().equals("admin")){
-                    admin = true;
-                }
-                else{
-                    admin = false;
-                }
+                showDeleteBtn(dataSnapshot, model, viewHolder);
             }
 
             @Override
@@ -147,72 +133,7 @@ public class BlogKomenAdapter extends RecyclerView.Adapter<BlogKomenAdapter.View
             @Override
             public void onClick(final View v) {
 
-                if(admin){
-
-                    mDatabaseKomen.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-
-                            if((boolean)dataSnapshot.child(mPostKey).child(model.getKomen_id()).child("bestkomen").getValue()){
-
-                                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                                builder.setCancelable(true);
-                                builder.setTitle("Cancel this as best comment ?");
-                                builder.setMessage(model.getDesc());
-                                builder.setPositiveButton("Ofcourse",
-                                        new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-
-                                                DatabaseReference newPost = mDatabaseKomen.child(mPostKey).child(komen_key);
-                                                newPost.child("bestkomen").setValue(false);
-
-                                            }
-                                        });
-                                builder.setNegativeButton("Nope", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                    }
-                                });
-
-                                AlertDialog dialog = builder.create();
-                                dialog.show();
-
-                            }else{
-
-                                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                                builder.setCancelable(true);
-                                builder.setTitle("Select this as best comment ?");
-                                builder.setMessage(model.getDesc());
-                                builder.setPositiveButton("Ofcourse",
-                                        new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-
-                                                DatabaseReference newPost = mDatabaseKomen.child(mPostKey).child(komen_key);
-                                                newPost.child("bestkomen").setValue(true);
-
-                                            }
-                                        });
-                                builder.setNegativeButton("Nope", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                    }
-                                });
-
-                                AlertDialog dialog = builder.create();
-                                dialog.show();
-
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                }
+                selectBestComment(admin, model, v);
 
             }
         });
@@ -234,7 +155,7 @@ public class BlogKomenAdapter extends RecyclerView.Adapter<BlogKomenAdapter.View
 
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                        mDatabaseKomen.child(mPostKey).child(komen_key).removeValue();
+                                        mDatabaseKomen.child(mPostKey).child(model.getKomen_id()).removeValue();
 
                                     }
 
@@ -259,6 +180,95 @@ public class BlogKomenAdapter extends RecyclerView.Adapter<BlogKomenAdapter.View
         });
 
 
+    }
+
+    private void selectBestComment(boolean isAdmin, final Komen model, final View v) {
+        if(isAdmin){
+
+            mDatabaseKomen.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    Komen komenModel = dataSnapshot.child(mPostKey).child(model.getKomen_id()).getValue(Komen.class);
+
+                    if(komenModel.isBestkomen()){
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                        builder.setCancelable(true);
+                        builder.setTitle("Cancel this as best comment ?");
+                        builder.setMessage(model.getDesc());
+                        builder.setPositiveButton("Ofcourse",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        DatabaseReference newPost = mDatabaseKomen.child(mPostKey).child(model.getKomen_id());
+                                        newPost.child("bestkomen").setValue(false);
+
+                                    }
+                                });
+                        builder.setNegativeButton("Nope", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+
+                    }else{
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                        builder.setCancelable(true);
+                        builder.setTitle("Select this as best comment ?");
+                        builder.setMessage(model.getDesc());
+                        builder.setPositiveButton("Ofcourse",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        DatabaseReference newPost = mDatabaseKomen.child(mPostKey).child(model.getKomen_id());
+                                        newPost.child("bestkomen").setValue(true);
+
+                                    }
+                                });
+                        builder.setNegativeButton("Nope", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    private void showDeleteBtn(DataSnapshot dataSnapshot, Komen model, BlogKomenAdapter.ViewHolder viewHolder) {
+        User userModel = dataSnapshot.child(mAuth.getCurrentUser().getUid()).getValue(User.class);
+
+        if (model.getUsername().equals(userModel.getName()))
+        {
+
+            viewHolder.mDeleteBtn.setVisibility(View.VISIBLE);
+
+        }
+
+        if(userModel.getType().equals("admin")){
+            admin = true;
+        }
+        else{
+            admin = false;
+        }
     }
 
     @Override

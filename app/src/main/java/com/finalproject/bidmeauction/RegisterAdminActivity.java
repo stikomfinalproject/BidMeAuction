@@ -87,7 +87,7 @@ public class RegisterAdminActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                startRegister();
+                startRegisterAdmin();
 
             }
         });
@@ -113,7 +113,7 @@ public class RegisterAdminActivity extends AppCompatActivity {
         return true;
     }
 
-    private void startRegister() {
+    private void startRegisterAdmin() {
 
         final String name = mNameField.getText().toString().trim();
         final String email = mEmailField.getText().toString().trim();
@@ -168,6 +168,12 @@ public class RegisterAdminActivity extends AppCompatActivity {
                             }
                         });
 
+                    }else{
+
+
+                        mProgress.dismiss();
+
+                        Toast.makeText(RegisterAdminActivity.this, "Unsuccessful", Toast.LENGTH_SHORT).show();
                     }
 
 
@@ -187,7 +193,7 @@ public class RegisterAdminActivity extends AppCompatActivity {
             else if(!TextUtils.isEmpty(password)){
                 Toast.makeText(RegisterAdminActivity.this,"Fill your password", Toast.LENGTH_SHORT).show();
             }
-            else if(mImageUri != null){
+            else if(mImageUri == null){
                 Toast.makeText(RegisterAdminActivity.this,"Choose your profile picture", Toast.LENGTH_SHORT).show();
             }
         }

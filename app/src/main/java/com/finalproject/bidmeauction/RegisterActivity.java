@@ -152,6 +152,12 @@ public class RegisterActivity extends AppCompatActivity {
                             }
                         });
 
+                    }else{
+
+                        mProgress.dismiss();
+
+                        Toast.makeText(RegisterActivity.this, "Unsuccessful", Toast.LENGTH_SHORT).show();
+
                     }
 
 
@@ -171,7 +177,7 @@ public class RegisterActivity extends AppCompatActivity {
             else if(!TextUtils.isEmpty(password)){
                 Toast.makeText(RegisterActivity.this,"Fill your password", Toast.LENGTH_SHORT).show();
             }
-            else if(mImageUri != null){
+            else if(mImageUri == null){
                 Toast.makeText(RegisterActivity.this,"Choose your profile picture", Toast.LENGTH_SHORT).show();
             }
         }
