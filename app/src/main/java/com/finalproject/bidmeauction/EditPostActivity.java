@@ -173,6 +173,7 @@ public class EditPostActivity extends AppCompatActivity {
         final double bid_val = Double.parseDouble(mPostBid.getText().toString().trim());
         final Calendar room_time = new GregorianCalendar(mDateRoom.getYear(), mDateRoom.getMonth(), mDateRoom.getDayOfMonth(), jam, menit);
         final long waktu = room_time.getTimeInMillis();
+        final long tutup = room_time.getTimeInMillis() + 7200000;
 
 
         if (!TextUtils.isEmpty(title_val) && !TextUtils.isEmpty(desc_val)) {
@@ -192,6 +193,8 @@ public class EditPostActivity extends AppCompatActivity {
                         newPost.child("uid").setValue(mCurrentUser.getUid());
                         newPost.child("waktu").setValue(waktu);
                         newPost.child("bid").setValue(bid_val);
+                        newPost.child("tutup").setValue(tutup);
+                        newPost.child("available").setValue(true);
                         newPost.child("bidname").setValue(dataSnapshot.child("name").getValue());
                         newPost.child("auction_id").setValue(newPost.getKey());
                         newPost.child("biduid").setValue(mCurrentUser.getUid());
@@ -255,7 +258,9 @@ public class EditPostActivity extends AppCompatActivity {
                                 newPost.child("image").setValue(downloadUrl);
                                 newPost.child("uid").setValue(mCurrentUser.getUid());
                                 newPost.child("waktu").setValue(waktu);
+                                newPost.child("tutup").setValue(tutup);
                                 newPost.child("bid").setValue(bid_val);
+                                newPost.child("available").setValue(true);
                                 newPost.child("bidname").setValue(dataSnapshot.child("name").getValue());
                                 newPost.child("auction_id").setValue(newPost.getKey());
                                 newPost.child("biduid").setValue(mCurrentUser.getUid());

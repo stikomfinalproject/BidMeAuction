@@ -8,9 +8,11 @@ import java.util.Date;
 
 public class Blog {
 
-    private String title, desc, image, username, bidname, auction_id, biduid;
+    private String title, desc, image, username, bidname, auction_id, biduid, uid;
 
-    private long waktu;
+    boolean available;
+
+    private long waktu, tutup;
 
     private int bid;
 
@@ -18,61 +20,36 @@ public class Blog {
 
     }
 
-    public Blog(String title, String desc, String image, String username, String bidname, long waktu, int bid, String auction_id, String biduid) {
+    public Blog(String title, String desc, String image, String username, String bidname, String auction_id, String biduid, String uid, boolean available, long waktu, long tutup, int bid) {
         this.title = title;
         this.desc = desc;
         this.image = image;
         this.username = username;
         this.bidname = bidname;
-        this.waktu = waktu;
-        this.bid = bid;
         this.auction_id = auction_id;
         this.biduid = biduid;
-    }
-
-    public String getBiduid() {
-        return biduid;
-    }
-
-    public void setBiduid(String biduid) {
-        this.biduid = biduid;
-    }
-
-    public String getAuction_id() {
-        return auction_id;
-    }
-
-    public void setAuction_id(String auction_id) {
-        this.auction_id = auction_id;
-    }
-
-    public String getBidname() {
-        return bidname;
-    }
-
-    public void setBidname(String bidname) {
-        this.bidname = bidname;
-    }
-
-    public long getWaktu() {
-        return waktu;
-    }
-
-    public void setWaktu(long waktu) {
+        this.uid = uid;
+        this.available = available;
         this.waktu = waktu;
-    }
-
-    public int getBid() {
-        return bid;
-    }
-
-    public void setBid(int bid) {
+        this.tutup = tutup;
         this.bid = bid;
     }
 
-    public String getUsername() { return username; }
+    public String getUid() {
+        return uid;
+    }
 
-    public void setUsername(String username) { this.username = username; }
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
 
     public String getTitle() {
         return title;
@@ -96,5 +73,61 @@ public class Blog {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getBidname() {
+        return bidname;
+    }
+
+    public void setBidname(String bidname) {
+        this.bidname = bidname;
+    }
+
+    public String getAuction_id() {
+        return auction_id;
+    }
+
+    public void setAuction_id(String auction_id) {
+        this.auction_id = auction_id;
+    }
+
+    public String getBiduid() {
+        return biduid;
+    }
+
+    public void setBiduid(String biduid) {
+        this.biduid = biduid;
+    }
+
+    public long getWaktu() {
+        return waktu;
+    }
+
+    public void setWaktu(long waktu) {
+        this.waktu = waktu;
+    }
+
+    public long getTutup() {
+        return tutup;
+    }
+
+    public void setTutup(long tutup) {
+        this.tutup = tutup;
+    }
+
+    public int getBid() {
+        return bid;
+    }
+
+    public void setBid(int bid) {
+        this.bid = bid;
     }
 }

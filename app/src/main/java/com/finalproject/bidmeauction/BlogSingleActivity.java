@@ -184,10 +184,11 @@ public class BlogSingleActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 Blog model = dataSnapshot.getValue(Blog.class);
-
-                mBlogSingleTitle.setText(model.getTitle());
-                mBlogSingleDesc.setText(model.getDesc());
-                Picasso.with(BlogSingleActivity.this).load(model.getImage()).into(mBlogSingleImage);
+                if(model != null){
+                    mBlogSingleTitle.setText(model.getTitle());
+                    mBlogSingleDesc.setText(model.getDesc());
+                    Picasso.with(BlogSingleActivity.this).load(model.getImage()).into(mBlogSingleImage);
+                }
 
             }
 
@@ -286,6 +287,10 @@ public class BlogSingleActivity extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
+                            finish();
+                            Intent mainIntent = new Intent(BlogSingleActivity.this, MainActivity.class);
+                            startActivity(mainIntent);
+
                             mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -306,10 +311,6 @@ public class BlogSingleActivity extends AppCompatActivity {
                             mDatabaseBid.child(mPost_key).removeValue();
                             mDatabaseLike.child(mPost_key).removeValue();
                             mDatabaseBook.child(mPost_key).removeValue();
-
-                            finish();
-                            Intent mainIntent = new Intent(BlogSingleActivity.this, MainActivity.class);
-                            startActivity(mainIntent);
 
                         }
                     });
