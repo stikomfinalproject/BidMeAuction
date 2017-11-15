@@ -84,7 +84,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                mDatas.clear();
                 for (final DataSnapshot postSnapshot: dataSnapshotParent.getChildren()) {
                     final Blog blog = postSnapshot.getValue(Blog.class);
 
