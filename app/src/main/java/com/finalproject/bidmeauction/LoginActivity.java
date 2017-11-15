@@ -45,6 +45,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private Button mLoginBtn;
     private Button mGoToRegister;
+    private Button mGoToForgotPassword;
 
     private FirebaseAuth mAuth;
 
@@ -93,6 +94,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
         mLoginBtn = (Button) findViewById(R.id.loginBtn);
+        mGoToRegister = (Button) findViewById(R.id.goToRegister);
+        mGoToForgotPassword = (Button) findViewById(R.id.goToForgotPassword);
 
         mLoginPasswordField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -105,7 +108,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        mGoToRegister = (Button) findViewById(R.id.goToRegister);
 
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,7 +136,6 @@ public class LoginActivity extends AppCompatActivity {
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-
         mGoogleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,13 +145,22 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
         mGoToRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(registerIntent);
+
+            }
+        });
+
+        mGoToForgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent ForgotIntent = new Intent(LoginActivity.this, ForgotActivity.class);
+                startActivity(ForgotIntent);
 
             }
         });

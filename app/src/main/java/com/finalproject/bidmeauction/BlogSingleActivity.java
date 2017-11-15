@@ -100,8 +100,6 @@ public class BlogSingleActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         mProgress = new ProgressDialog(this);
 
         mAuth = FirebaseAuth.getInstance();
@@ -199,6 +197,7 @@ public class BlogSingleActivity extends AppCompatActivity {
             }
         });
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void startKomenting() {
