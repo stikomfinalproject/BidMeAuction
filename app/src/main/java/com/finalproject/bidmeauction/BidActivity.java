@@ -49,7 +49,6 @@ public class BidActivity extends AppCompatActivity {
     private TextView mBidUsername;
     private TextView mBidBid;
     private TextView mCountDown;
-    private TextView mUserCount;
     private EditText mBidTeks;
     private Button mBidBtn;
 
@@ -68,18 +67,12 @@ public class BidActivity extends AppCompatActivity {
     Blog modelAuction = null;
     User modelUser = null;
 
-    DecimalFormatSymbols symbols;
-    DecimalFormat decimalFormat;
     Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bid);
-
-        symbols = new DecimalFormatSymbols();
-        symbols.setGroupingSeparator('.');
-        decimalFormat = new DecimalFormat("Rp #,###", symbols);
 
         mProgress = new ProgressDialog(this);
 
@@ -99,7 +92,6 @@ public class BidActivity extends AppCompatActivity {
         mBidBid = (TextView) findViewById(R.id.bid_bid);
         mBidUsername = (TextView) findViewById(R.id.bid_username);
         mCountDown = (TextView) findViewById(R.id.countDown);
-        mUserCount = (TextView) findViewById(R.id.userCount);
         mBidBtn = (Button) findViewById(R.id.bid_btn);
         mBidQuick = (Button) findViewById(R.id.bid_quick);
 
@@ -124,20 +116,6 @@ public class BidActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 modelAuction = dataSnapshot.getValue(Blog.class);
                 checkHighestBid(modelAuction);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        mDatabase.child(mPost_key).child("user_count").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                mDatabase.child(mPost_key).child("user_count").setValue(dataSnapshot.getValue(Integer.class)+1);
-
             }
 
             @Override
@@ -205,7 +183,7 @@ public class BidActivity extends AppCompatActivity {
                         }
                         String str = mBidTeks.getText().toString().replaceAll(",", "");
                         if (!value.equals(""))
-                            mBidTeks.setText(getDecimalFormattedString(str));
+                            mBidTeks.setText(additionalMethod.getDecimalFormattedString(str));
 
                         int diff = mBidTeks.getText().toString().length() - originalStr.length();
                         mBidTeks.setSelection(cursorPosition + diff);
@@ -357,17 +335,15 @@ public class BidActivity extends AppCompatActivity {
     private void checkHighestBid(Blog model) {
         bid_total = model.getBid();
 
-        int bidBid = model.getBid();
-
-        String rupiahFormat = decimalFormat.format(bidBid);
+        String rupiahFormat = additionalMethod.getRupiahFormattedString(model.getBid());
         mBidBid.setText(rupiahFormat);
 
         mBidUsername.setText(model.getBidname());
 
-        if (model.getBiduid().equals(mCurrentUser.getUid())) {
+        if (model.getBiduid().equals(mCurrentUser.getUid())) {/*
             mBidTeks.setEnabled(false);
             mBidBtn.setEnabled(false);
-            mBidQuick.setEnabled(false);
+            mBidQuick.setEnabled(false);*/
         } else {
             mBidTeks.setEnabled(true);
             mBidBtn.setEnabled(true);
@@ -377,40 +353,6 @@ public class BidActivity extends AppCompatActivity {
         bid_plus = bid_total / 20;
 
         mBidQuick.setText("QUICK BID - " + String.valueOf(bid_total + bid_plus));
-    }
-
-
-    public static String getDecimalFormattedString(String value) {
-        if (value != null && !value.equalsIgnoreCase("")) {
-            StringTokenizer lst = new StringTokenizer(value, ".");
-            String str1 = value;
-            String str2 = "";
-            if (lst.countTokens() > 1) {
-                str1 = lst.nextToken();
-                str2 = lst.nextToken();
-            }
-            String str3 = "";
-            int i = 0;
-            int j = -1 + str1.length();
-            if (str1.charAt(-1 + str1.length()) == '.') {
-                j--;
-                str3 = ".";
-            }
-            for (int k = j; ; k--) {
-                if (k < 0) {
-                    if (str2.length() > 0)
-                        str3 = str3 + "." + str2;
-                    return str3;
-                }
-                if (i == 3) {
-                    str3 = "," + str3;
-                    i = 0;
-                }
-                str3 = str1.charAt(k) + str3;
-                i++;
-            }
-        }
-        return "";
     }
 
     class MoneyValueFilter extends DigitsKeyListener {
@@ -448,7 +390,7 @@ public class BidActivity extends AppCompatActivity {
                     // being here means, that a number has
                     // been inserted after the dot
                     // check if the amount of digits is right
-                    return getDecimalFormattedString((dlen - (i + 1) + len > digits) ? "" : String.valueOf(new SpannableStringBuilder(source, start, end)));
+                    return additionalMethod.getDecimalFormattedString((dlen - (i + 1) + len > digits) ? "" : String.valueOf(new SpannableStringBuilder(source, start, end)));
                 }
             }
 
@@ -466,7 +408,7 @@ public class BidActivity extends AppCompatActivity {
 
             // if the dot is after the inserted part,
             // nothing can break
-            return getDecimalFormattedString(String.valueOf(new SpannableStringBuilder(source, start, end)));
+            return additionalMethod.getDecimalFormattedString(String.valueOf(new SpannableStringBuilder(source, start, end)));
         }
     }
 
