@@ -16,6 +16,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 public class PinActivity extends AppCompatActivity {
 
     private EditText pinNumber;
@@ -23,8 +27,6 @@ public class PinActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabaseUsers;
     private FirebaseAuth mAuth;
-
-    private static boolean finish = false;
 
     private User userModel;
 
@@ -39,23 +41,25 @@ public class PinActivity extends AppCompatActivity {
         pinNumber = (EditText) findViewById(R.id.pin_number);
         pinBtn = (Button) findViewById(R.id.pin_btn);
 
-        mDatabaseUsers.child(mAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                userModel = dataSnapshot.getValue(User.class);
-                if (userModel.getPin() == null){
-                    Intent setupPinIntent = new Intent(PinActivity.this, SetupPinActivity.class);
-                    startActivity(setupPinIntent);
-                    finish();
+        if(mAuth.getCurrentUser()!=null) {
+            mDatabaseUsers.child(mAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    userModel = dataSnapshot.getValue(User.class);
+                    if (userModel.getPin() == null) {
+                        Intent setupPinIntent = new Intent(PinActivity.this, SetupPinActivity.class);
+                        startActivity(setupPinIntent);
+                        finish();
+                    }
+
                 }
 
-            }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+                }
+            });
+        }
 
         pinBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,9 +76,5 @@ public class PinActivity extends AppCompatActivity {
             mainIntent.putExtra("success_pin", "success");
             startActivity(mainIntent);
         }
-    }
-
-    public static boolean isFinish(){
-        return finish;
     }
 }
