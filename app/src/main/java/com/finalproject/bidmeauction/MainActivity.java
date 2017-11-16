@@ -216,42 +216,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         };
 
-        mDatabaseUsers.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(mAuth.getCurrentUser() != null) {
-
-                    userModel = dataSnapshot.getValue(User.class);
-                    if (!userModel.getName().isEmpty() && !userModel.getImage().isEmpty()) {
-                        if(userModel.getType().equals("admin")){
-                            mNavTeksName.setText("[Admin] " + userModel.getName());
-                        }else{
-                            mNavTeksName.setText(userModel.getName());
-                        }
-                        Picasso.with(getApplicationContext()).load(userModel.getImage()).transform(new additionalMethod.CircleTransform()).into(mNavProfileImage);
-                        mNavTeksSaldo.setText(additionalMethod.getRupiahFormattedString(userModel.getBalance()));
-                    }
-
-                    if(checkIsAdmin(userModel)) {
-
-                        Menu nav_Menu = navigationView.getMenu();
-                        nav_Menu.findItem(R.id.nav_add_admin).setVisible(true);
-
-                    }
-
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
         checkUserExist();
-        checkPinSuccess();
 
     }
 
@@ -332,6 +297,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         startActivity(setupIntent);
                         finish();
 
+                    }else {
+                        mDatabaseUsers.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (mAuth.getCurrentUser() != null) {
+
+                                    userModel = dataSnapshot.getValue(User.class);
+                                    if (!userModel.getName().isEmpty() && !userModel.getImage().isEmpty()) {
+                                        if (userModel.getType().equals("admin")) {
+                                            mNavTeksName.setText("[Admin] " + userModel.getName());
+                                        } else {
+                                            mNavTeksName.setText(userModel.getName());
+                                        }
+                                        Picasso.with(getApplicationContext()).load(userModel.getImage()).transform(new additionalMethod.CircleTransform()).into(mNavProfileImage);
+                                        mNavTeksSaldo.setText(additionalMethod.getRupiahFormattedString(userModel.getBalance()));
+                                    }
+
+                                    if (checkIsAdmin(userModel)) {
+
+                                        Menu nav_Menu = navigationView.getMenu();
+                                        nav_Menu.findItem(R.id.nav_add_admin).setVisible(true);
+
+                                    }
+
+
+                                }
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                        checkPinSuccess();
                     }
 
 

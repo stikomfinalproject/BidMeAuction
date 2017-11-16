@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private Button mLoginBtn;
     private Button mGoToRegister;
-    private Button mGoToForgotPassword;
+    private TextView mGoToForgotPassword;
 
     private FirebaseAuth mAuth;
 
@@ -99,7 +99,7 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginBtn = (Button) findViewById(R.id.loginBtn);
         mGoToRegister = (Button) findViewById(R.id.goToRegister);
-        mGoToForgotPassword = (Button) findViewById(R.id.goToForgotPassword);
+        mGoToForgotPassword = (TextView) findViewById(R.id.goToForgotPassword);
 
         mLoginPasswordField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
