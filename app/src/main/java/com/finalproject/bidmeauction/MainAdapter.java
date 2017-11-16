@@ -33,10 +33,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
     private DatabaseReference mDatabaseBlog;
     private DatabaseReference mDatabaseTime;
 
-    private CardView mCardView;
-
-    private Button mJoinBtn;
-
     private Long currentTime = (long) 0;
 
     public MainAdapter() {
@@ -50,7 +46,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         mDatabaseTime.keepSynced(true);
 
         mDatabaseTime.setValue(ServerValue.TIMESTAMP);
-        mDatabaseTime.addValueEventListener(new ValueEventListener() {
+        mDatabaseTime.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -65,7 +61,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
                             Blog blog = postSnapshot.getValue(Blog.class);
 
                             if(postSnapshot.child("waktu").getValue() != null) {
-                                if (new Date((long) postSnapshot.child("waktu").getValue()).before(new Date(currentTime))) {
+                                if (new Date(blog.getWaktu()).before(new Date(currentTime))) {
                                     mItems.add(blog);
                                 }
                             }
@@ -116,35 +112,12 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
             @Override
             public void onClick(View v) {
 
-                //Toast.makeText(MainActivity.this, post_key, Toast.LENGTH_LONG).show();
-
                 Intent singleBlogIntent = new Intent(v.getContext(), BlogSingleActivity.class);
                 singleBlogIntent.putExtra("blog_id", post_key);
                 v.getContext().startActivity(singleBlogIntent);
 
             }
         });
-
-        /*/BELAJAR DAPETIN WAKTU DARI SERVER
-        mDatabaseTime.setValue(ServerValue.TIMESTAMP);
-        mDatabaseTime.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                if(new Date(model.getWaktu()).after(new Date((long)dataSnapshot.getValue()))){
-
-                    viewHolder.mJoinRoomBtn.setText("Book");
-                    available[0] = false;
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });*/
 
         viewHolder.mJoinRoomBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -195,30 +168,17 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
         }
 
-        public void setTitle(String title){/*
-            String readmore = "";
-            if(title.length() > 20){
-                readmore = "...";
-            }
-            String upToNCharacters = title.substring(0, Math.min(title.length(), 20));
-*/
+        public void setTitle(String title){
 
             TextView post_title = (TextView) mView.findViewById(R.id.post_title);
             post_title.setText(title);
-            //post_title.setText(upToNCharacters + readmore);
 
         }
 
         public void setDesc(String desc){
-            /*String readmore = "";
-            if(desc.length() > 20){
-                readmore = "...";
-            }
-            String upToNCharacters = desc.substring(0, Math.min(desc.length(), 20));*/
 
             TextView post_desc = (TextView) mView.findViewById(R.id.post_desc);
             post_desc.setText(desc);
-            //post_desc.setText(upToNCharacters + readmore);
 
         }
 

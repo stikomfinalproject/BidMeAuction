@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -45,18 +46,7 @@ public class SearchActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabaseTime;
 
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     SwipeRefreshLayout mySwipeRefreshLayout;
-
-    //Navigation Menu
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mToggle;
-    private NavigationView navigationView;
-    //Navigation Header
-    private TextView mNavTeksName;
-    private TextView mNavTeksSaldo;
-    private ImageView mNavProfileImage;
 
     public TextView noData;
 
@@ -79,8 +69,6 @@ public class SearchActivity extends AppCompatActivity {
         mDatabase.keepSynced(true);
         mDatabaseUsers.keepSynced(true);
         mDatabaseTime.keepSynced(true);
-
-        mAuth = FirebaseAuth.getInstance();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.blog_list);
         mRecyclerView.setHasFixedSize(true);
@@ -115,25 +103,11 @@ public class SearchActivity extends AppCompatActivity {
 
         searchView = (MaterialSearchView) findViewById(R.id.search_view);
 
-        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
-            @Override
-            public void onSearchViewShown() {
-
-            }
-
-            @Override
-            public void onSearchViewClosed() {
-
-                //If closed Search View , lstView will return default
-
-            }
-        });
-
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
 
-                Toast.makeText(SearchActivity.this, "You searched " + s, Toast.LENGTH_SHORT).show();
+                doSearch(s);
 
                 return false;
             }
@@ -146,27 +120,6 @@ public class SearchActivity extends AppCompatActivity {
 
         });
 
-        mDatabaseUsers.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("type")) {
-
-                    if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("type").getValue().toString().equals("admin")) {
-
-                        Menu nav_Menu = navigationView.getMenu();
-                        nav_Menu.findItem(R.id.nav_add_admin).setVisible(true);
-
-                    }
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
         noData = (TextView) findViewById(R.id.main_no_data);
 
         noData.setVisibility(View.GONE);
@@ -174,16 +127,15 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mAdapter.notifyDataSetChanged();
-                navigationView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                mRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                     @Override
                     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                        navigationView.removeOnLayoutChangeListener(this);
-                        /*if(mAdapter.getItemCount() <1){
+                        if(mAdapter.getItemCount() <1){
                             noData.setVisibility(View.VISIBLE);
                         }
                         else{
                             noData.setVisibility(View.GONE);
-                        }*/
+                        }
                     }
                 });
             }
@@ -194,35 +146,28 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
 
-        //Access to navigation header
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        View headerView = navigationView.getHeaderView(0);
-        mNavTeksName = (TextView) headerView.findViewById(R.id.nav_teks_name);
-        mNavTeksSaldo = (TextView) headerView.findViewById(R.id.nav_teks_saldo);
-        mNavProfileImage = (ImageView) headerView.findViewById(R.id.nav_profile_image);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+    }
 
-                if (firebaseAuth.getCurrentUser() == null) {
-
-                    Intent loginIntent = new Intent(SearchActivity.this, LoginActivity.class);
-                    loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(loginIntent);
-                    finish();
-
-                }
-
-            }
-        };
-
+    private void doSearch(String s) {
+        mAdapter = new SearchAdapter(s);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.search_menu, menu);
+
+        MenuItem item = menu.findItem(R.id.action_search);
+
+        searchView.setMenuItem(item);
+
+        return super.onCreateOptionsMenu(menu);
     }
 }

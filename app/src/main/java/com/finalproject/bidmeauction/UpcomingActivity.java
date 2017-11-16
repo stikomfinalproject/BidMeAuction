@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -13,6 +15,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
 
 public class UpcomingActivity extends AppCompatActivity {
 
@@ -27,6 +31,8 @@ public class UpcomingActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseTime;
 
     SwipeRefreshLayout mySwipeRefreshLayout;
+
+    TextView noData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +57,7 @@ public class UpcomingActivity extends AppCompatActivity {
         mAdapter = new UpcomingAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
+
         //Swipe to REFRESH
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         mySwipeRefreshLayout.setOnRefreshListener(
@@ -60,11 +67,44 @@ public class UpcomingActivity extends AppCompatActivity {
 
                         mySwipeRefreshLayout.setRefreshing(true);
                         mAdapter.notifyDataSetChanged();
+
+                        if(mAdapter.getItemCount() <1){
+                            noData.setVisibility(View.VISIBLE);
+                        }
+                        else{
+                            noData.setVisibility(View.GONE);
+                        }
                         mySwipeRefreshLayout.setRefreshing(false);
 
                     }
                 }
         );
+
+        noData = (TextView) findViewById(R.id.main_no_data);
+
+        noData.setVisibility(View.GONE);
+        mDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mAdapter.notifyDataSetChanged();
+                mRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                    @Override
+                    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                        if(mAdapter.getItemCount() <1){
+                            noData.setVisibility(View.VISIBLE);
+                        }
+                        else{
+                            noData.setVisibility(View.GONE);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

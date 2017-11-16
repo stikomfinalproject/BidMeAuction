@@ -1,87 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@mipmap/bluredbg"
     tools:context="com.finalproject.bidmeauction.LoginActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/loginToolbar"
-        app:theme="@style/ToolBarStyle"
-        />
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/login_rectangle"
-        android:layout_width="350dp"
-        android:layout_height="400dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/toolbar"
-        android:layout_marginTop="150dp"
-        android:background="@drawable/rectangle_login"/>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/loginToolbar"
+            app:theme="@style/ToolBarStyle" />
 
-    <EditText
-        android:id="@+id/loginEmailField"
-        android:background="@drawable/input_outline"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:inputType="textPersonName"
-        android:hint="Email"
-        app:layout_constraintTop_toTopOf="@+id/login_rectangle"
-        app:layout_constraintLeft_toLeftOf="@+id/login_rectangle"
-        app:layout_constraintRight_toRightOf="@+id/login_rectangle"
-        android:layout_marginTop="50dp" />
+        <TextView
+            android:id="@+id/rectangleBackground"
+            android:layout_width="280dp"
+            android:layout_height="330dp"
+            android:background="@drawable/rectangle_login"
+            android:alpha=".70"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            android:layout_marginTop="50dp"/>
 
-    <EditText
-        android:id="@+id/loginPasswordField"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:background="@drawable/input_outline"
-        android:padding="10dp"
-        android:inputType="textPassword"
-        android:hint="Password"
-        android:layout_marginTop="25dp"
-        app:layout_constraintTop_toBottomOf="@+id/loginEmailField"
-        app:layout_constraintLeft_toLeftOf="@+id/login_rectangle"
-        app:layout_constraintRight_toRightOf="@+id/login_rectangle"
-        android:imeOptions="actionDone" />
+        <TextView
+            android:id="@+id/rectangle_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Log in To Start"
+            android:textSize="20sp"
+            app:layout_constraintLeft_toLeftOf="@+id/rectangleBackground"
+            app:layout_constraintRight_toRightOf="@+id/rectangleBackground"
+            app:layout_constraintTop_toTopOf="@+id/rectangleBackground"
+            android:layout_marginTop="50dp"/>
 
-    <Button
-        android:id="@+id/loginBtn"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:text="Log In"
-        android:layout_marginRight="8dp"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/loginPasswordField"
-        app:layout_constraintRight_toLeftOf="@+id/googleBtn" />
+        <EditText
+            android:id="@+id/loginEmailField"
+            android:background="@drawable/input_outline"
+            android:layout_width="240dp"
+            android:layout_height="40dp"
+            android:padding="10dp"
+            android:inputType="textPersonName"
+            android:hint="Email"
+            android:textSize="12sp"
+            app:layout_constraintLeft_toLeftOf="@+id/rectangleBackground"
+            app:layout_constraintRight_toRightOf="@+id/rectangleBackground"
+            app:layout_constraintTop_toBottomOf="@+id/rectangle_title"
+            android:layout_marginTop="50dp"/>
 
-    <Button
-        android:id="@+id/goToRegister"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Register"
-        tools:layout_editor_absoluteX="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="8dp" />
+        <EditText
+            android:id="@+id/loginPasswordField"
+            android:layout_width="240dp"
+            android:layout_height="40dp"
+            android:background="@drawable/input_outline"
+            android:padding="10dp"
+            android:inputType="textPassword"
+            android:hint="Password"
+            android:textSize="12sp"
+            app:layout_constraintLeft_toLeftOf="@+id/rectangleBackground"
+            app:layout_constraintRight_toRightOf="@+id/rectangleBackground"
+            app:layout_constraintTop_toBottomOf="@+id/loginEmailField"
+            android:layout_marginTop="20dp" />
 
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/googleBtn"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
-        app:layout_constraintBottom_toBottomOf="@+id/loginBtn"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/loginBtn"
-        android:layout_marginEnd="16dp"></com.google.android.gms.common.SignInButton>
+        <TextView
+            android:id="@+id/goToForgotPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="forgot password"
+            android:textSize="12sp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            app:layout_constraintRight_toRightOf="@+id/loginPasswordField"
+            app:layout_constraintTop_toBottomOf="@+id/loginPasswordField"
+            android:layout_marginTop="10dp"/>
 
-</android.support.constraint.ConstraintLayout>
+
+        <Button
+            android:id="@+id/loginBtn"
+            android:layout_width="250dp"
+            android:layout_height="50dp"
+            android:text="Log In"
+            app:layout_constraintLeft_toLeftOf="@+id/rectangleBackground"
+            app:layout_constraintRight_toRightOf="@+id/rectangleBackground"
+            app:layout_constraintTop_toBottomOf="@+id/loginPasswordField"
+            android:layout_marginTop="40dp" />
+
+        <Button
+            android:id="@+id/goToRegister"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:text="Register"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rectangleBackground"
+            android:layout_marginTop="50dp"
+            android:layout_marginStart="50dp"/>
+
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/googleBtn"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rectangleBackground"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="50dp"></com.google.android.gms.common.SignInButton>
+        
+        <android.support.v4.widget.Space
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            app:layout_constraintTop_toBottomOf="@id/goToRegister"/>
+
+    </android.support.constraint.ConstraintLayout>
+</ScrollView>
