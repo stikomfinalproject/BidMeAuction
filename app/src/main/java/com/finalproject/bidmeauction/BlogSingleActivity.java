@@ -108,7 +108,7 @@ public class BlogSingleActivity extends AppCompatActivity {
 
         mCurrentUser = mAuth.getCurrentUser();
 
-        mPost_key = getIntent().getExtras().getString("blog_id");
+        mPost_key = getIntent().getStringExtra("blog_id");
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Blog");
         mDatabaseKomen = FirebaseDatabase.getInstance().getReference().child("Komen");
