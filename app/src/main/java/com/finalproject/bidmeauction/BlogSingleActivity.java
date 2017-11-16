@@ -92,10 +92,14 @@ public class BlogSingleActivity extends AppCompatActivity {
 
     private NestedScrollView mScrollView;
 
+    private String update;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blog_single);
+
+        Log.v("ASDASDASD","ASDASDASasdasdD");
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -106,7 +110,7 @@ public class BlogSingleActivity extends AppCompatActivity {
 
         mCurrentUser = mAuth.getCurrentUser();
 
-        mPost_key = getIntent().getExtras().getString("blog_id");
+        mPost_key = getIntent().getStringExtra("blog_id");
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Blog");
         mDatabaseKomen = FirebaseDatabase.getInstance().getReference().child("Komen");
@@ -119,9 +123,6 @@ public class BlogSingleActivity extends AppCompatActivity {
 
         mDatabase.keepSynced(true);
         mDatabaseKomen.keepSynced(true);
-
-        mKomenList = (RecyclerView) findViewById(R.id.komen_list);
-        mKomenList.setLayoutManager(new LinearLayoutManager(this));
 
         mBlogSingleDesc = (TextView) findViewById(R.id.singleBlogDescription);
         mBlogSingleImage = (ImageView) findViewById(R.id.singleBlogView);
