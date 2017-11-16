@@ -42,6 +42,8 @@ import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -81,7 +83,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private boolean admin = false;
 
-    MaterialSearchView searchView;
+    private User userModel;
+
+    private MaterialSearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,9 +104,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDatabaseTime.keepSynced(true);
 
         mAuth = FirebaseAuth.getInstance();
-        checkUserExist();
-
-        checkPinSuccess();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.blog_list);
         mRecyclerView.setHasFixedSize(true);
@@ -141,31 +142,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mDatabaseUsers.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("type")){
-
-                    User userModel = dataSnapshot.child(mAuth.getCurrentUser().getUid()).getValue(User.class);
-
-                    if(checkIsAdmin(userModel)) {
-
-                        Menu nav_Menu = navigationView.getMenu();
-                        nav_Menu.findItem(R.id.nav_add_admin).setVisible(true);
-
-                    }
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
         //Swipe to REFRESH
+
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -238,18 +216,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         };
 
-        mDatabaseUsers.addValueEventListener(new ValueEventListener() {
+        mDatabaseUsers.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(mAuth.getCurrentUser() != null) {
-                    if (!dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
 
-                        checkUserExist();
-
-                    } else if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("name") && dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("image")) {
-                        mNavTeksName.setText(dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("name").getValue().toString());
-                        Picasso.with(getApplicationContext()).load(dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("image").getValue().toString()).transform(new CircleTransform()).into(mNavProfileImage);
+                    userModel = dataSnapshot.getValue(User.class);
+                    if (!userModel.getName().isEmpty() && !userModel.getImage().isEmpty()) {
+                        if(userModel.getType().equals("admin")){
+                            mNavTeksName.setText("[Admin] " + userModel.getName());
+                        }else{
+                            mNavTeksName.setText(userModel.getName());
+                        }
+                        Picasso.with(getApplicationContext()).load(userModel.getImage()).transform(new additionalMethod.CircleTransform()).into(mNavProfileImage);
+                        mNavTeksSaldo.setText(additionalMethod.getRupiahFormattedString(userModel.getBalance()));
                     }
+
+                    if(checkIsAdmin(userModel)) {
+
+                        Menu nav_Menu = navigationView.getMenu();
+                        nav_Menu.findItem(R.id.nav_add_admin).setVisible(true);
+
+                    }
+
+
                 }
 
             }
@@ -259,6 +249,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
         });
+
+        checkUserExist();
+        checkPinSuccess();
 
     }
 
@@ -277,55 +270,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void checkPinSuccess() {
-        if(getIntent().getExtras() != null){
-            afterPin = getIntent().getExtras().getString("success_pin");
-            if(afterPin == null){
-                mDatabaseUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                        if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("pin")){
-                            Intent pinIntent = new Intent(MainActivity.this, PinActivity.class);
-                            startActivity(pinIntent);
-                            finish();
-                        }else
-                        {
-                            Intent setupPinIntent = new Intent(MainActivity.this, SetupPinActivity.class);
-                            startActivity(setupPinIntent);
-                            finish();
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-        }else{
-            mDatabaseUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    if (dataSnapshot.child(mAuth.getCurrentUser().getUid()).hasChild("pin")){
-                        Intent pinIntent = new Intent(MainActivity.this, PinActivity.class);
-                        startActivity(pinIntent);
-                        finish();
-                    }else
-                    {
-                        Intent setupPinIntent = new Intent(MainActivity.this, SetupPinActivity.class);
-                        startActivity(setupPinIntent);
-                        finish();
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
+        afterPin = getIntent().getStringExtra("success_pin");
+        if(afterPin == null) {
+            Intent pinIntent = new Intent(MainActivity.this, PinActivity.class);
+            startActivity(pinIntent);
+            finish();
         }
     }
 
@@ -364,41 +313,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mAuth.addAuthStateListener(mAuthListener);
 
-    }
-
-    public class CircleTransform implements Transformation {
-        @Override
-        public Bitmap transform(Bitmap source) {
-            int size = Math.min(source.getWidth(), source.getHeight());
-
-            int x = (source.getWidth() - size) / 2;
-            int y = (source.getHeight() - size) / 2;
-
-            Bitmap squaredBitmap = Bitmap.createBitmap(source, x, y, size, size);
-            if (squaredBitmap != source) {
-                source.recycle();
-            }
-
-            Bitmap bitmap = Bitmap.createBitmap(size, size, source.getConfig());
-
-            Canvas canvas = new Canvas(bitmap);
-            Paint paint = new Paint();
-            BitmapShader shader = new BitmapShader(squaredBitmap,
-                    BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP);
-            paint.setShader(shader);
-            paint.setAntiAlias(true);
-
-            float r = size / 2f;
-            canvas.drawCircle(r, r, r, paint);
-
-            squaredBitmap.recycle();
-            return bitmap;
-        }
-
-        @Override
-        public String key() {
-            return "circle";
-        }
     }
 
     private void checkUserExist() {

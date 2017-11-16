@@ -33,10 +33,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
     private DatabaseReference mDatabaseBlog;
     private DatabaseReference mDatabaseTime;
 
-    private CardView mCardView;
-
-    private Button mJoinBtn;
-
     private Long currentTime = (long) 0;
 
     public MainAdapter() {
@@ -50,7 +46,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         mDatabaseTime.keepSynced(true);
 
         mDatabaseTime.setValue(ServerValue.TIMESTAMP);
-        mDatabaseTime.addValueEventListener(new ValueEventListener() {
+        mDatabaseTime.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
