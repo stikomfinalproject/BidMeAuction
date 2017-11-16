@@ -39,12 +39,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 public class LoginActivity extends AppCompatActivity {
     private EditText mLoginEmailField;
     private EditText mLoginPasswordField;
 
     private Button mLoginBtn;
     private Button mGoToRegister;
+    private TextView mGoToForgotPassword;
 
     private FirebaseAuth mAuth;
 
@@ -93,6 +98,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
         mLoginBtn = (Button) findViewById(R.id.loginBtn);
+        mGoToRegister = (Button) findViewById(R.id.goToRegister);
+        mGoToForgotPassword = (TextView) findViewById(R.id.goToForgotPassword);
 
         mLoginPasswordField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -105,7 +112,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        mGoToRegister = (Button) findViewById(R.id.goToRegister);
 
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,7 +140,6 @@ public class LoginActivity extends AppCompatActivity {
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-
         mGoogleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,13 +149,22 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
         mGoToRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(registerIntent);
+
+            }
+        });
+
+        mGoToForgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent ForgotIntent = new Intent(LoginActivity.this, ForgotActivity.class);
+                startActivity(ForgotIntent);
 
             }
         });
@@ -300,7 +314,10 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        finish();
+                        Intent exitIntent = new Intent(LoginActivity.this, ExitActivity.class);
+                        exitIntent.addFlags(FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_NEW_TASK);
+                        exitIntent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(exitIntent);
 
                     }
                 });

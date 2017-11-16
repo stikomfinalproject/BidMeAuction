@@ -43,7 +43,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
     private String searchValue;
 
-    public SearchAdapter(final String s) {
+    public SearchAdapter(final String searchValue) {
         super();
 
         mItems = new LinkedList<Blog>();
@@ -62,33 +62,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                final DataSnapshot dataSnapshotParent = dataSnapshot;
-
-                mDatabaseBlog.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                        mItems.clear();
-                        for (final DataSnapshot postSnapshot: dataSnapshotParent.getChildren()) {
-                            final Blog blog = postSnapshot.getValue(Blog.class);
-
-                            if(blog.getTitle().contains(s)){
-                                mItems.addFirst(blog);
-                            }
-                            else if(blog.getDesc().contains(s))
-                            {
-                                mItems.addLast(blog);
-                            }
-
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                mItems = getAllData(dataSnapshot, searchValue);
 
             }
 
@@ -100,13 +74,46 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
     }
 
+    private LinkedList<Blog> getAllData(DataSnapshot dataSnapshot, final String searchValue) {
+
+        final LinkedList<Blog> mDatas = new LinkedList<Blog>();
+
+        final DataSnapshot dataSnapshotParent = dataSnapshot;
+
+        mDatabaseBlog.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (final DataSnapshot postSnapshot: dataSnapshotParent.getChildren()) {
+                    final Blog blog = postSnapshot.getValue(Blog.class);
+
+                    if(blog.getTitle().contains(searchValue)){
+                        mDatas.addFirst(blog);
+                    }
+                    else if(blog.getDesc().contains(searchValue))
+                    {
+                        mDatas.addLast(blog);
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return mDatas;
+
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.blog_row, viewGroup, false);
         ViewHolder viewHolder = new ViewHolder(v);
-
-
 
         return viewHolder;
     }
@@ -127,8 +134,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         viewHolder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //Toast.makeText(MainActivity.this, post_key, Toast.LENGTH_LONG).show();
 
                 Intent singleBlogIntent = new Intent(v.getContext(), BlogSingleActivity.class);
                 singleBlogIntent.putExtra("blog_id", post_key);
@@ -232,7 +237,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     }
 
     class ViewHolder extends RecyclerView.ViewHolder  {
-
 
         View mView;
 

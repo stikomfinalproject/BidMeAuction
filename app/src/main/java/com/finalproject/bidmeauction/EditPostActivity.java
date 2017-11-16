@@ -101,13 +101,15 @@ public class EditPostActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
+                Blog modelAuction = dataSnapshot.child(mPost_key).getValue(Blog.class);
+
                 Picasso.with(getApplicationContext()).load(dataSnapshot.child(mPost_key).child("image").getValue().toString()).into(mSelectImage);
 
-                mPostTitle.setText(dataSnapshot.child(mPost_key).child("title").getValue().toString());
-                mPostDesc.setText(dataSnapshot.child(mPost_key).child("desc").getValue().toString());
-                mPostBid.setText(dataSnapshot.child(mPost_key).child("bid").getValue().toString());
+                mPostTitle.setText(modelAuction.getTitle());
+                mPostDesc.setText(modelAuction.getDesc());
+                mPostBid.setText(String.valueOf(modelAuction.getBid()));
                 Calendar waktu = Calendar.getInstance();
-                waktu.setTimeInMillis((long) dataSnapshot.child(mPost_key).child("waktu").getValue());
+                waktu.setTimeInMillis(modelAuction.getWaktu());
                 mDateRoom.updateDate(waktu.get(Calendar.YEAR), waktu.get(Calendar.MONTH), waktu.get(Calendar.DAY_OF_MONTH));
                 if (Build.VERSION.SDK_INT >= 23 ){
                     mTimeRoom.setHour(waktu.get(Calendar.HOUR_OF_DAY));
@@ -141,7 +143,7 @@ public class EditPostActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                startPosting();
+                startEditPost();
 
             }
         });
@@ -150,7 +152,7 @@ public class EditPostActivity extends AppCompatActivity {
 
     }
 
-    private void startPosting() {
+    private void startEditPost() {
 
         mProgress.setMessage("Posting to Blog ...");
         mProgress.setCancelable(false);
@@ -171,6 +173,7 @@ public class EditPostActivity extends AppCompatActivity {
         final double bid_val = Double.parseDouble(mPostBid.getText().toString().trim());
         final Calendar room_time = new GregorianCalendar(mDateRoom.getYear(), mDateRoom.getMonth(), mDateRoom.getDayOfMonth(), jam, menit);
         final long waktu = room_time.getTimeInMillis();
+        final long tutup = room_time.getTimeInMillis() + 7200000;
 
 
         if (!TextUtils.isEmpty(title_val) && !TextUtils.isEmpty(desc_val)) {
@@ -190,6 +193,8 @@ public class EditPostActivity extends AppCompatActivity {
                         newPost.child("uid").setValue(mCurrentUser.getUid());
                         newPost.child("waktu").setValue(waktu);
                         newPost.child("bid").setValue(bid_val);
+                        newPost.child("tutup").setValue(tutup);
+                        newPost.child("available").setValue(true);
                         newPost.child("bidname").setValue(dataSnapshot.child("name").getValue());
                         newPost.child("auction_id").setValue(newPost.getKey());
                         newPost.child("biduid").setValue(mCurrentUser.getUid());
@@ -253,7 +258,9 @@ public class EditPostActivity extends AppCompatActivity {
                                 newPost.child("image").setValue(downloadUrl);
                                 newPost.child("uid").setValue(mCurrentUser.getUid());
                                 newPost.child("waktu").setValue(waktu);
+                                newPost.child("tutup").setValue(tutup);
                                 newPost.child("bid").setValue(bid_val);
+                                newPost.child("available").setValue(true);
                                 newPost.child("bidname").setValue(dataSnapshot.child("name").getValue());
                                 newPost.child("auction_id").setValue(newPost.getKey());
                                 newPost.child("biduid").setValue(mCurrentUser.getUid());
