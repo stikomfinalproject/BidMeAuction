@@ -48,6 +48,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabaseUsers;
+    private DatabaseReference mDatabaseVoucher;
     private StorageReference mStorageImage;
     private FirebaseStorage mFirebaseStorage;
 
@@ -55,7 +56,10 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView mProfileUsername;
     private TextView mProfilePhone;
     private TextView mProfileAddress;
+    private TextView mProfileBalance;
     private Button mChangePasswordBtn;
+    private Button mTopUpBtn;
+    private Button mAddTopUpBtn;
 
     private ImageButton mProfileImage;
 
@@ -63,6 +67,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private Uri mImageUri = null;
     private static final int GALLERY_REQUEST = 1;
+
+    private User userModel;
 
 
     @Override
@@ -74,8 +80,11 @@ public class ProfileActivity extends AppCompatActivity {
         mProfileUsername = (TextView) findViewById(R.id.profile_username);
         mProfilePhone = (TextView) findViewById(R.id.profile_phone);
         mProfileAddress = (TextView) findViewById(R.id.profile_address);
+        mProfileBalance = (TextView) findViewById(R.id.profile_balance);
         mProfileImage = (ImageButton) findViewById(R.id.profile_image);
         mChangePasswordBtn = (Button) findViewById(R.id.change_password_btn);
+        mTopUpBtn = (Button) findViewById(R.id.top_up_btn);
+        mAddTopUpBtn = (Button) findViewById(R.id.add_top_up_btn);
         mProgress = new ProgressDialog(this);
 
         mStorageImage = FirebaseStorage.getInstance().getReference().child("Profile_images");
@@ -84,11 +93,17 @@ public class ProfileActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
+        mDatabaseVoucher = FirebaseDatabase.getInstance().getReference().child("Voucher");
 
         mDatabaseUsers.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                showUserProfile(dataSnapshot);
+                userModel = dataSnapshot.getValue(User.class);
+                showUserProfile(userModel);
+
+                if(userModel.getType().equals("admin")){
+                    mAddTopUpBtn.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -132,6 +147,20 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        mTopUpBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                topUp();
+            }
+        });
+
+        mAddTopUpBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addTopUp();
+            }
+        });
+
         for (UserInfo user: FirebaseAuth.getInstance().getCurrentUser().getProviderData()) {
             if(user.getProviderId().equals("google.com")){
                 mChangePasswordBtn.setVisibility(View.GONE);
@@ -142,28 +171,103 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-    private void showUserProfile(DataSnapshot dataSnapshot) {
+    private void addTopUp() {
+        Context context = ProfileActivity.this;
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        final EditText voucher = new EditText(context);
+        voucher.setHint("10 alphanumeric voucher");
+        layout.addView(voucher);
+
+        final EditText value = new EditText(context);
+        value.setHint("value");
+        layout.addView(value);
+
+        new AlertDialog.Builder(ProfileActivity.this)
+                .setTitle("Add new voucher")
+                .setMessage("Additional information goes here")
+                .setView(layout)
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                        mProgress.setMessage("Adding new voucher");
+                        mProgress.show();
+                        mDatabaseVoucher.child(voucher.getText().toString()).setValue(Integer.parseInt(value.getText().toString()));
+                        mProgress.dismiss();
+                        }
+                    })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                    }
+                })
+                .show();
+
+    }
+
+    private void topUp() {
+        final EditText mTeksVoucher = new EditText(ProfileActivity.this);
+
+        mTeksVoucher.setHint("a voucher consist 10 alphanumeric");
+
+        new AlertDialog.Builder(ProfileActivity.this)
+                .setTitle("Input your 10 alphanumeric voucher in here")
+                .setMessage("Additional information goes here")
+                .setView(mTeksVoucher)
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        mDatabaseVoucher.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                            if(dataSnapshot.hasChild(mTeksVoucher.getText().toString())){
+                                int add_balance = dataSnapshot.child(mTeksVoucher.getText().toString()).getValue(Integer.class);
+                                mDatabaseUsers.child(mAuth.getCurrentUser().getUid()).child("balance").setValue(userModel.getBalance()+add_balance);
+                                mDatabaseVoucher.child(mTeksVoucher.getText().toString()).removeValue();
+                            }else{
+                                Toast.makeText(ProfileActivity.this, "Invalid Voucher", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                    }
+                })
+                .show();
+
+    }
+
+    private void showUserProfile(User inUserModel) {
         mProfileEmail.setText(mAuth.getCurrentUser().getEmail());
-        if(dataSnapshot.hasChild("name")){
-            mProfileUsername.setText(dataSnapshot.child("name").getValue().toString());
+        if(inUserModel.getName()!=null){
+            mProfileUsername.setText(inUserModel.getName());
         }
         else{
             mProfileUsername.setText("click here to set your name");
         }
-        if(dataSnapshot.hasChild("image")) {
-            Picasso.with(getApplicationContext()).load(dataSnapshot.child("image").getValue().toString()).transform(new ProfileActivity.CircleTransform()).into(mProfileImage);
+        if(inUserModel.getImage()!=null) {
+            Picasso.with(getApplicationContext()).load(inUserModel.getImage()).transform(new additionalMethod.CircleTransform()).into(mProfileImage);
         }
-        if(dataSnapshot.hasChild("address")) {
-            mProfileAddress.setText(dataSnapshot.child("address").getValue().toString());
+        if(inUserModel.getAddress()!=null) {
+            mProfileAddress.setText(inUserModel.getAddress());
         }else{
             mProfileAddress.setText("click here to set your address");
         }
-
-        if(dataSnapshot.hasChild("phone")){
-            mProfilePhone.setText(dataSnapshot.child("phone").getValue().toString());
+        if(inUserModel.getPhone()!=null){
+            mProfilePhone.setText(inUserModel.getPhone());
         }else{
             mProfilePhone.setText("click here to set your phone");
         }
+        mProfileBalance.setText(additionalMethod.getRupiahFormattedString(inUserModel.getBalance()));
     }
 
     private void changeProfileImage() {
@@ -313,42 +417,6 @@ public class ProfileActivity extends AppCompatActivity {
                 })
                 .show();
     }
-
-    public class CircleTransform implements Transformation {
-        @Override
-        public Bitmap transform(Bitmap source) {
-            int size = Math.min(source.getWidth(), source.getHeight());
-
-            int x = (source.getWidth() - size) / 2;
-            int y = (source.getHeight() - size) / 2;
-
-            Bitmap squaredBitmap = Bitmap.createBitmap(source, x, y, size, size);
-            if (squaredBitmap != source) {
-                source.recycle();
-            }
-
-            Bitmap bitmap = Bitmap.createBitmap(size, size, source.getConfig());
-
-            Canvas canvas = new Canvas(bitmap);
-            Paint paint = new Paint();
-            BitmapShader shader = new BitmapShader(squaredBitmap,
-                    BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP);
-            paint.setShader(shader);
-            paint.setAntiAlias(true);
-
-            float r = size / 2f;
-            canvas.drawCircle(r, r, r, paint);
-
-            squaredBitmap.recycle();
-            return bitmap;
-        }
-
-        @Override
-        public String key() {
-            return "circle";
-        }
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

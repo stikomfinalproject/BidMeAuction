@@ -51,6 +51,11 @@
                 android:layout_height="wrap_content"
                 android:text="address" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="balance" />
+
         </LinearLayout>
 
 
@@ -85,20 +90,40 @@
                 android:layout_height="wrap_content"
                 android:text="" />
 
+            <TextView
+                android:id="@+id/profile_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
+
         </LinearLayout>
 
+
     </LinearLayout>
+
+    <Button
+        android:id="@+id/top_up_btn"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Top Up"/>
+
+    <Button
+        android:id="@+id/add_top_up_btn"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Add Top Up"
+        android:visibility="gone"/>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/change_password_btn"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_gravity="bottom"
-        android:text="change password"/>
+        <Button
+            android:id="@+id/change_password_btn"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:text="change password"/>
 
     </FrameLayout>
 

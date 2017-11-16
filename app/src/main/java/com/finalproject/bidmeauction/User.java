@@ -8,15 +8,26 @@ public class User {
 
     String address, image, name, phone, pin, type;
 
+    int balance;
+
     public User(){}
 
-    public User(String address, String image, String name, String phone, String pin, String type) {
+    public User(String address, String image, String name, String phone, String pin, String type, int balance) {
         this.address = address;
         this.image = image;
         this.name = name;
         this.phone = phone;
         this.pin = pin;
         this.type = type;
+        this.balance = balance;
+    }
+
+    public int getBalance() {
+        return balance;
+    }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
     }
 
     public String getAddress() {
