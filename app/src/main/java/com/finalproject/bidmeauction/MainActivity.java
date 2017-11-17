@@ -87,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private MaterialSearchView searchView;
 
+    private int trueBalance;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -231,7 +233,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 mNavTeksName.setText(userModel.getName());
                             }
                             Picasso.with(getApplicationContext()).load(userModel.getImage()).transform(new additionalMethod.CircleTransform()).into(mNavProfileImage);
-                            mNavTeksSaldo.setText(additionalMethod.getRupiahFormattedString(userModel.getBalance()));
                         }
 
                         if (checkIsAdmin(userModel)) {
@@ -240,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             nav_Menu.findItem(R.id.nav_add_admin).setVisible(true);
 
                         }
-
+                        checkBidBalance();
 
                     }
 
@@ -266,6 +267,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         checkUserExist();
 
 
+    }
+
+    public void checkBidBalance() {
+        mDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                trueBalance = userModel.getBalance();
+
+                for(DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+
+                    Blog auction = postSnapshot.getValue(Blog.class);
+
+                    if(auction.getUid()!=null) {
+                        if (auction.getBiduid().equals(mAuth.getCurrentUser().getUid())) {
+
+                            trueBalance -= auction.getBid();
+
+                        }
+                    }
+
+                }
+
+                mNavTeksSaldo.setText(additionalMethod.getRupiahFormattedString(trueBalance));
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private boolean checkIsAdmin(User userModel) {

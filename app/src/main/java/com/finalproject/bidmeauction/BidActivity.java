@@ -258,13 +258,13 @@ public class BidActivity extends AppCompatActivity {
                         mBidTeks.setEnabled(false);
                         mBidBtn.setEnabled(false);
                         mBidQuick.setEnabled(false);
-                        Log.v("RUNNABLE","NOT AVAILABLE");
                         Log.v(String.valueOf(new Date(dataSnapshot.getValue(long.class))),String.valueOf(new Date(modelAuction.getTutup())));
                         mDatabase.child(mPost_key).child("available").setValue(false);
                         Intent mainIntent = new Intent(BidActivity.this, MainActivity.class);
                         mainIntent.addFlags(FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_NEW_TASK);
                         mainIntent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
                         mainIntent.putExtra("success_pin", "success");
+                        Toast.makeText(BidActivity.this, "Auction is finished", Toast.LENGTH_SHORT).show();
                         startActivity(mainIntent);
                     }
 
@@ -355,10 +355,10 @@ public class BidActivity extends AppCompatActivity {
 
         mBidUsername.setText(model.getBidname());
 
-        if (model.getBiduid().equals(mCurrentUser.getUid())) {/*
+        if (model.getBiduid().equals(mCurrentUser.getUid())) {
             mBidTeks.setEnabled(false);
             mBidBtn.setEnabled(false);
-            mBidQuick.setEnabled(false);*/
+            mBidQuick.setEnabled(false);
         } else {
             mBidTeks.setEnabled(true);
             mBidBtn.setEnabled(true);
