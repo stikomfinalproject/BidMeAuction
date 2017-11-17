@@ -120,9 +120,6 @@ public class BlogSingleActivity extends AppCompatActivity {
         mDatabase.keepSynced(true);
         mDatabaseKomen.keepSynced(true);
 
-        mKomenList = (RecyclerView) findViewById(R.id.komen_list);
-        mKomenList.setLayoutManager(new LinearLayoutManager(this));
-
         mBlogSingleDesc = (TextView) findViewById(R.id.singleBlogDescription);
         mBlogSingleImage = (ImageView) findViewById(R.id.singleBlogView);
         mBlogSingleTitle = (TextView) findViewById(R.id.singleBlogTitle);
