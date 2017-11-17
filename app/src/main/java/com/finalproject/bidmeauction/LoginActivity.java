@@ -11,6 +11,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -48,7 +50,6 @@ public class LoginActivity extends AppCompatActivity {
     private EditText mLoginPasswordField;
 
     private Button mLoginBtn;
-    private Button mGoToRegister;
     private TextView mGoToForgotPassword;
 
     private FirebaseAuth mAuth;
@@ -57,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabaseUsers;
 
-    private SignInButton mGoogleBtn;
+    private Button mGoogleBtn;
 
     private static final int RC_SIGN_IN = 1;
 
@@ -91,14 +92,13 @@ public class LoginActivity extends AppCompatActivity {
 
         mProgress = new ProgressDialog(this);
 
-        mGoogleBtn = (SignInButton) findViewById(R.id.googleBtn);
+        mGoogleBtn = (Button) findViewById(R.id.googleBtn);
 
         mLoginEmailField = (EditText) findViewById(R.id.loginEmailField);
         mLoginPasswordField = (EditText) findViewById(R.id.loginPasswordField);
 
 
         mLoginBtn = (Button) findViewById(R.id.loginBtn);
-        mGoToRegister = (Button) findViewById(R.id.goToRegister);
         mGoToForgotPassword = (TextView) findViewById(R.id.goToForgotPassword);
 
         mLoginPasswordField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -145,16 +145,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 signIn();
-
-            }
-        });
-
-        mGoToRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(registerIntent);
 
             }
         });
@@ -263,7 +253,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    private void checkUserExist() {
+    private void checkUserExist() {/*
 
         if(mAuth.getCurrentUser() != null){
 
@@ -299,8 +289,14 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
 
-        }
+        }*/
 
+
+        finish();
+
+        Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+        mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_NEW_TASK);
+        startActivity(mainIntent);
     }
 
     @Override
@@ -329,5 +325,25 @@ public class LoginActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.login_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.action_register){
+
+            Intent postIntent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(postIntent);
+
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

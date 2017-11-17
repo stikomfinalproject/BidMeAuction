@@ -49,6 +49,7 @@ public class BidActivity extends AppCompatActivity {
     private TextView mBidUsername;
     private TextView mBidBid;
     private TextView mCountDown;
+    private TextView mTrueBalance;
     private EditText mBidTeks;
     private Button mBidBtn;
 
@@ -68,6 +69,8 @@ public class BidActivity extends AppCompatActivity {
     User modelUser = null;
 
     Handler handler = new Handler();
+
+    private int trueBalance = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +95,7 @@ public class BidActivity extends AppCompatActivity {
         mBidBid = (TextView) findViewById(R.id.bid_bid);
         mBidUsername = (TextView) findViewById(R.id.bid_username);
         mCountDown = (TextView) findViewById(R.id.countDown);
+        mTrueBalance = (TextView) findViewById(R.id.true_balance);
         mBidBtn = (Button) findViewById(R.id.bid_btn);
         mBidQuick = (Button) findViewById(R.id.bid_quick);
 
@@ -110,6 +114,8 @@ public class BidActivity extends AppCompatActivity {
 
             }
         });
+
+        checkBidBalance();
 
         mDatabase.child(mPost_key).addValueEventListener(new ValueEventListener() {
             @Override
@@ -199,35 +205,38 @@ public class BidActivity extends AppCompatActivity {
 
         handler.post(run);
 
-        /*
-        final Handler handler = new Handler();;
-        final int delay = 10000; //milliseconds
-        handler.postDelayed(new Runnable(){
-            public void run(){
+    }
 
-                mDatabaseTime.setValue(ServerValue.TIMESTAMP);
-                mDatabaseTime.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Toast.makeText(BidActivity.this, String.valueOf(new Date(dataSnapshot.getValue(long.class))), Toast.LENGTH_SHORT).show();
-                        Log.v("ASDASDASDASD",String.valueOf(new Date(dataSnapshot.getValue(long.class))));
+    private void checkBidBalance() {
+        mDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                trueBalance = modelUser.getBalance();
+
+                for(DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+
+                    Blog auction = postSnapshot.getValue(Blog.class);
+
+                    if(auction.getUid()!=null) {
+                        if (auction.getBiduid().equals(mAuth.getCurrentUser().getUid()) && !auction.getAuction_id().equals(mPost_key)) {
+
+                            trueBalance -= auction.getBid();
+
+                        }
                     }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                }
 
-                    }
-                });
+                mTrueBalance.setText(additionalMethod.getRupiahFormattedString(trueBalance));
 
-                handler.postDelayed(this, delay);
+            }
 
-            }}, delay);
-*/
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-
-
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+            }
+        });
     }
 
     private final Runnable run = new Runnable(){
@@ -242,10 +251,8 @@ public class BidActivity extends AppCompatActivity {
 
                     if(new Date(dataSnapshot.getValue(long.class)).before(new Date(modelAuction.getTutup())) || modelUser.getType().equals("admin")) {
 
-
                         mCountDown.setText(String.valueOf((int)(modelAuction.getTutup() - dataSnapshot.getValue(long.class)) / 1000) + " Seconds left");
 
-                        Log.v("RUNNABLE", "AVAILABLE");
                     }
                     else{
                         mBidTeks.setEnabled(false);
@@ -282,19 +289,24 @@ public class BidActivity extends AppCompatActivity {
 
 
     private void performQuickBid() {
-        bid_plus = bid_total / 20;
+        bid_total = bid_total + (bid_total / 20);
 
-        final DatabaseReference newPost = mDatabase.child(mPost_key);
+        if(trueBalance >= bid_total) {
 
-        newPost.child("bid").setValue(bid_total + bid_plus);
+            final DatabaseReference newPost = mDatabase.child(mPost_key);
 
-        newPost.child("bidname").setValue(bid_name);
+            newPost.child("bid").setValue(bid_total);
 
-        newPost.child("biduid").setValue(mCurrentUser.getUid());
+            newPost.child("bidname").setValue(bid_name);
 
-        updateTutup(newPost);
+            newPost.child("biduid").setValue(mCurrentUser.getUid());
 
-        mBidTeks.setText("");
+            updateTutup(newPost);
+
+            mBidTeks.setText("");
+        }else{
+            Toast.makeText(BidActivity.this, "Could not use Quick Bid because your balance is not enough", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void performBid() {
@@ -303,7 +315,10 @@ public class BidActivity extends AppCompatActivity {
             Toast.makeText(BidActivity.this, "Input your amount", Toast.LENGTH_SHORT).show();
         } else if (Integer.parseInt(bidTeks) <= bid_total) {
             Toast.makeText(BidActivity.this, "Your Ammount is less than the highest bid", Toast.LENGTH_SHORT).show();
-        } else {
+        } else if (trueBalance < Integer.parseInt(bidTeks)){
+            Toast.makeText(BidActivity.this, "Could not Bid because your balance is not enough", Toast.LENGTH_SHORT).show();
+        }
+        else{
             final DatabaseReference newPost = mDatabase.child(mPost_key);
             newPost.child("bid").setValue(Integer.parseInt(bidTeks));
             newPost.child("bidname").setValue(bid_name);
